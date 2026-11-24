@@ -4,16 +4,24 @@ Website mua hàng và quản lý cửa hàng giày dép, xây dựng bằng Djan
 
 ## Chạy ứng dụng
 
-Tạo môi trường Python, cài `requirements.txt`, tạo `.env` theo `.env.example` và phục hồi CSDL. Sau đó chạy:
+Tạo môi trường Python, cài `requirements.txt`, tạo `.env` theo `.env.example` và nạp bộ SQL trong thư mục `CSDL` của hồ sơ nộp bằng pgAdmin (PostgreSQL 18):
+
+1. Mở Query Tool tại database `postgres`, bật Auto commit và chạy riêng `CSDL/00_tao_database.sql` để tạo database `dacn_truong_gia_bao`.
+2. Refresh mục Databases, chọn đúng `dacn_truong_gia_bao`, mở Query Tool mới, bật Auto commit và chạy toàn bộ `CSDL/01_khoi_tao_he_thong.sql`.
+3. Chạy `CSDL/02_kiem_tra_sau_khi_chay.sql` để đối chiếu. Không cần dùng Restore hoặc `pg_restore`.
+4. Trong `.env`, điền `DB_NAME=dacn_truong_gia_bao` cùng `DB_USER` (tài khoản PostgreSQL đã dùng chạy SQL, ví dụ `postgres`), `DB_PASSWORD`, `DB_HOST=127.0.0.1`, `DB_PORT` (thường là `5432`) và `DJANGO_SECRET_KEY`. Xem chi tiết từng bước tại `CSDL/HUONG_DAN_CHAY_POSTGRESQL.txt`.
+
+Sau đó chạy:
 
 ```powershell
 python manage.py migrate
+python manage.py createsuperuser
 python manage.py collectstatic --noinput
 python manage.py check
 python manage.py runserver 127.0.0.1:8891
 ```
 
-Trang mua hàng: http://127.0.0.1:8891/. Trang quản lý: http://127.0.0.1:8891/quan-tri/.
+Trang mua hàng: http://127.0.0.1:8891/. Trang quản lý: http://127.0.0.1:8891/quan-tri/ (đăng nhập bằng tài khoản quản trị vừa tạo bằng `createsuperuser`).
 Trên máy đã có môi trường và CSDL cục bộ, có thể dùng `run.ps1`. Dùng `test.ps1` để kiểm thử và `database.ps1` để đối soát, sao lưu hoặc phục hồi thử.
 
 ## Tổ chức mã
@@ -28,6 +36,17 @@ Có thể đổi vị trí bằng các biến trong `.env`: `DACN_DATA_DIR`, `RE
 Nhật ký kiểm tra, bản sao cục bộ và tệp sinh khi chạy nằm trong `.runtime/`; không đưa thư mục này hoặc `.env` lên kho mã.
 
 Xem `docs/structure.md`, `docs/usage.md`, `docs/payments.md` và `sql/README.md` để tra cứu chi tiết.
+
+## Chạy phần huấn luyện riêng
+
+```powershell
+python -m pip install -r ../nghien_cuu/requirements.txt
+python tools/train_forecast.py --verify-reference
+```
+
+Công cụ đọc CSV tại `Du_lieu` cạnh `Ma_nguon`, không cần CSDL hoặc `.env`. Dùng `--data-dir` nếu dữ liệu nằm nơi khác; `--product MH00381` chọn biểu đồ sản phẩm. Mỗi lần chạy ghi tệp mới, không ghi đè dữ liệu đã chốt. Xem `../nghien_cuu/README.md` và notebook để thực hiện từng bước.
+
+Trang `/du-bao/nghien-cuu/` dùng chung mã tính toán trong `store/forecast/training.py`, hiển thị lượng dự đoán, thực tế, chênh lệch và biểu đồ theo tháng. Nút tải bảng đối chiếu xuất riêng sản phẩm đang chọn; tháng chưa có thực tế để trống. Chỉ quản trị viên được cập nhật kết quả; nhân viên kho được xem và tải bảng.
 
 ## Giá bán VND
 

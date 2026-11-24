@@ -85,9 +85,12 @@ def backup():
     dump = target / (
         "before_audit_" + datetime.now(datetime_timezone.utc).strftime("%Y%m%dT%H%M%S") + ".dump"
     )
+    pg_dump = Path(os.environ.get("PG_BIN", r"C:\Program Files\PostgreSQL\18\bin")) / (
+        "pg_dump.exe" if os.name == "nt" else "pg_dump"
+    )
     subprocess.run(
         [
-            r"C:\Program Files\PostgreSQL\18\bin\pg_dump.exe",
+            str(pg_dump),
             "-h",
             cfg["HOST"],
             "-p",

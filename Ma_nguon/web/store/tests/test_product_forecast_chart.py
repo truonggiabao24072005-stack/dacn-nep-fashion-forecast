@@ -60,7 +60,7 @@ class ProductForecastTests(TestCase):
             reverse("research_workspace"),
             {"dataset": self.ds.pk, "target": "2023-08", "unit": unit.pk},
         )
-        self.assertContains(response, "Dự đoán so với thực tế")
+        self.assertContains(response, "Dự đoán và thực tế qua các tháng")
         for unwanted in [
             "Validation MAE",
             "WAPE",
@@ -70,3 +70,35 @@ class ProductForecastTests(TestCase):
         ]:
             self.assertNotContains(response, unwanted)
         self.assertContains(response, 'type="hidden" name="experiment"')
+
+    def test_product_export_keeps_unknown_actual_blank(self):
+        import csv
+        import io
+
+        unit = self.ds.forecast_units.get(external_key="SKU-0")
+        self.client.force_login(self.warehouse)
+        response = self.client.get(
+            reverse("research_workspace"),
+            {"dataset": self.ds.pk, "target": "2023-08", "unit": unit.pk, "export": "product"},
+        )
+        self.assertEqual(response.status_code, 200)
+        rows = list(csv.DictReader(io.StringIO(response.content.decode("utf-8-sig"))))
+        self.assertTrue(rows)
+        self.assertEqual({r["Mã sản phẩm"] for r in rows}, {unit.label})
+        self.assertEqual(rows[-1]["Tháng"], "2023-08")
+        self.assertEqual(rows[-1]["Thực tế"], "")
+        self.assertEqual(rows[-1]["Chênh lệch"], "")
+
+    def test_observed_zero_is_shown_and_future_is_not_treated_as_zero(self):
+        unit = self.ds.forecast_units.get(external_key="SKU-0")
+        unit.monthly_sales.filter(month=date(2023, 7, 1)).update(
+            positive_qty=0, negative_qty_abs=0, net_qty=0, target_qty=0
+        )
+        self.client.force_login(self.admin)
+        url = reverse("research_workspace")
+        response = self.client.get(url, {"dataset": self.ds.pk, "unit": unit.pk, "target": "2023-07"})
+        self.assertTrue(response.context["actual_known"])
+        self.assertEqual(response.context["actual"], 0)
+        response = self.client.get(url, {"dataset": self.ds.pk, "unit": unit.pk, "target": "2023-08"})
+        self.assertFalse(response.context["actual_known"])
+        self.assertContains(response, "Chưa xác định")

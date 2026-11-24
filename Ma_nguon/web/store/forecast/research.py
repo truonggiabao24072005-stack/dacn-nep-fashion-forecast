@@ -16,6 +16,7 @@ from django.utils import timezone
 
 from store.forecast.metrics import point_metrics, training_scale
 from store.forecast.replenishment import month_add, month_parse
+from store.forecast.training import FEATURES, METHODS
 from store.models import (
     AuditEvent,
     DatasetVersion,
@@ -30,8 +31,6 @@ from store.models import (
 )
 from store.services.documents import BusinessError, audit, authorize
 
-METHODS = ("naive", "ma3", "linear", "random_forest")
-FEATURES = ["lag1", "lag2", "lag3", "ma3", "month_number"]
 VERSION = "research-origin-v1"
 
 
@@ -67,68 +66,12 @@ def research_context(dataset, experiment_id=None):
 
 
 def predict_origin(matrix, months, rf_config, random_seed=42, recipes=None):
-    """Return all four forecasts; the matrix ends at the cutoff, not the target."""
-    from sklearn.ensemble import RandomForestRegressor
-    from sklearn.linear_model import LinearRegression
+    from store.forecast.training import predict_origin as train_predict
 
-    a = np.asarray(matrix, dtype=float)
-    if a.ndim != 2 or not a.shape[0] or a.shape[1] < 9:
-        raise BusinessError("Chưa đủ lịch sử để tạo sáu cặp học có ba tháng trễ.")
-    if len(months) != a.shape[1] or any(type(m) is not date or m.day != 1 for m in months):
-        raise BusinessError("Lịch tháng không khớp dữ liệu.")
-    if any(m != month_add(months[0], i) for i, m in enumerate(months)):
-        raise BusinessError("Lịch tháng phải liên tục; tháng chưa biết giữ trống.")
-    finite = a[np.isfinite(a)]
-    if np.isinf(a).any() or (finite < 0).any() or (finite >= 1e14).any():
-        raise BusinessError("Lượng bán nguồn phải hữu hạn, không âm và trong giới hạn.")
-    n, length = a.shape
-    x_parts, y_parts, id_parts = [], [], []
-    for t in range(3, length):
-        lags = a[:, [t - 1, t - 2, t - 3]]
-        x = np.column_stack([lags, lags.mean(axis=1), np.full(n, months[t].month)])
-        mask = np.isfinite(x).all(axis=1) & np.isfinite(a[:, t])
-        x_parts.append(x[mask])
-        y_parts.append(a[mask, t])
-        id_parts.append(np.where(mask)[0])
-    X, Y, ids = np.concatenate(x_parts), np.concatenate(y_parts), np.concatenate(id_parts)
-    eligible = np.bincount(ids, minlength=n) >= 6
-    train = eligible[ids]
-    lags = a[:, [-1, -2, -3]]
-    future = np.column_stack([lags, lags.mean(axis=1), np.full(n, month_add(months[-1], 1).month)])
-    indices = np.where(eligible & np.isfinite(future).all(axis=1))[0]
-    if not len(indices) or not train.any():
-        raise BusinessError("Không có mã đủ sáu cặp học và ba tháng gần nhất liên tiếp.")
-    x = future[indices]
-    if recipes is not None:
-        from store.forecast.features import fit_recipe
-
-        if set(recipes) != set(METHODS):
-            raise BusinessError("Thiếu cấu hình của bốn phương pháp.")
-        if any(recipes[method].get("method") != method for method in METHODS):
-            raise BusinessError("Cấu hình biến đổi không khớp tên phương pháp.")
-        raw = {
-            method: fit_recipe(recipes[method], X[train], Y[train], x, random_seed)
-            for method in METHODS
-        }
-        return indices, raw, int(train.sum())
-    linear = LinearRegression().fit(X[train], Y[train]).predict(x)
-    forest = (
-        RandomForestRegressor(
-            n_estimators=rf_config["n_estimators"],
-            max_depth=rf_config["max_depth"],
-            min_samples_leaf=rf_config["min_samples_leaf"],
-            random_state=random_seed,
-            n_jobs=2,
-            bootstrap=True,
-            max_features=1.0,
-        )
-        .fit(X[train], Y[train])
-        .predict(x)
-    )
-    raw = {"naive": x[:, 0], "ma3": x[:, 3], "linear": linear, "random_forest": forest}
-    if any(not np.isfinite(v).all() or (np.abs(v) >= 1e14).any() for v in raw.values()):
-        raise BusinessError("Mô hình sinh giá trị ngoài giới hạn; chưa lưu kết quả.")
-    return indices, raw, int(train.sum())
+    try:
+        return train_predict(matrix, months, rf_config, random_seed, recipes)
+    except ValueError as exc:
+        raise BusinessError(str(exc)) from exc
 
 
 def _rf_config(exp):

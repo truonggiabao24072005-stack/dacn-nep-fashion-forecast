@@ -1,15 +1,109 @@
-{% extends 'store/shared/base.html' %}{% load static display %}
-{% block extra_head %}<link rel="stylesheet" href="{% static 'store/research.css' %}?v=20261120-refined"><script src="{% static 'store/research.js' %}?v=20261108-2" defer></script>{% endblock %}
-{% block heading_action %}<a class="btn" href="{% url 'forecasts' %}">Tất cả sản phẩm</a>{% endblock %}
-{% block content %}<div class="research-workspace">
-<section class="panel padded"><h2>Chọn sản phẩm cần dự đoán</h2><form method="get" class="research-selector">{% for field in form %}{% if field.is_hidden %}{{ field }}{% else %}<div class="field"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{{ field.errors }}</div>{% endif %}{% endfor %}<button class="btn primary">Xem dự đoán</button></form>{{ form.non_field_errors }}{% if context_error %}<p class="message warning">{{ context_error }}</p>{% endif %}</section>
-{% if target and unit %}
-<section class="panel padded"><div class="panel-heading"><div><h2>{{ unit.internal_product.name }}</h2><p>{{ unit.label }} · Tháng {{ target|date:'m/Y' }}</p></div><a class="btn" href="{% url 'shop_product' unit.internal_product_id %}">Xem sản phẩm</a></div>
-<div class="demand-result"><span>Nhu cầu dự đoán</span><strong>{% if selected_prediction.value %}{{ selected_prediction.value.nonnegative_value|number }} <small>{{ unit.unit }}</small>{% else %}Chưa đủ dữ liệu{% endif %}</strong></div>
-<p class="muted">Dựa trên lịch sử đến hết {{ cutoff|date:'m/Y' }}. Dự đoán lượng bán theo tháng; số liệu lịch sử 2022–2023 chưa thay thế lượng nhập cho kỳ hiện tại.</p>
-{% if readiness and not readiness.eligible %}<p class="message warning">Chưa đủ lịch sử liên tục để dự đoán sản phẩm trong kỳ này.{% if readiness.missing_lags %} Thiếu dữ liệu tháng {{ readiness.missing_lags|join:', ' }}.{% endif %}</p>{% endif %}
-{% if is_admin %}<form method="post" data-research-run>{% csrf_token %}<input type="hidden" name="action" value="run"><input type="hidden" name="dataset" value="{{ dataset.pk }}"><input type="hidden" name="experiment" value="{{ experiment.pk }}"><input type="hidden" name="target" value="{{ target|date:'Y-m' }}"><input type="hidden" name="unit" value="{{ unit.pk }}"><button class="btn" data-run-button>Cập nhật dự đoán</button><span class="research-run-status muted" role="status" data-run-status></span></form>{% endif %}</section>
-<section class="panel padded"><h2>Dự đoán so với thực tế</h2><p>Cùng một sản phẩm và cùng đơn vị tính. Cột chênh lệch cho biết tháng dự đoán dư hoặc thiếu.</p><div class="demand-chart">{{ comparison_svg|safe }}</div>
-<p class="muted">Tháng chưa có lượng bán thực tế được để trống; chưa tính chênh lệch. Đường đứt đoạn thể hiện dự đoán, khoảng trống thể hiện tháng chưa có dữ liệu.</p>
-<div class="table-scroll"><table><thead><tr><th>Tháng</th><th class="num">Nhu cầu dự đoán</th><th class="num">Lượng bán thực tế</th><th class="num">Chênh lệch</th></tr></thead><tbody>{% for row in comparison %}<tr><td>{{ row.month|date:'m/Y' }}</td><td class="num">{{ row.forecast|number }}</td><td class="num">{{ row.actual|number }}</td><td class="num">{% if row.difference != None %}{{ row.difference|number }}{% else %}Chưa xác định{% endif %}</td></tr>{% endfor %}</tbody></table></div></section>
-{% endif %}</div>{% endblock %}
+{% extends 'store/shared/base.html' %}
+{% load static display %}
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'store/research.css' %}?v=20261124">
+<script src="{% static 'store/research.js' %}?v=20261124" defer></script>
+{% endblock %}
+{% block heading_action %}
+<a class="btn" href="{% url 'forecasts' %}">Danh sách sản phẩm</a>
+{% endblock %}
+{% block content %}
+<div class="research-workspace">
+  <section class="panel padded">
+    <h2>Chọn sản phẩm và kỳ dự đoán</h2>
+    <form method="get" class="research-selector">
+      {% for field in form %}
+        {% if field.is_hidden %}{{ field }}{% else %}
+        <div class="field">
+          <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}{{ field.errors }}
+        </div>
+        {% endif %}
+      {% endfor %}
+      <button class="btn primary">Xem dự đoán</button>
+    </form>
+    {{ form.non_field_errors }}
+    {% if context_error %}<p class="message warning">{{ context_error }}</p>{% endif %}
+  </section>
+
+  {% if target and unit %}
+  <section class="panel padded demand-summary">
+    <div class="panel-heading">
+      <div>
+        <p class="demand-period">Kỳ {{ target|date:'m/Y' }} · {{ unit.label }}</p>
+        <h2>{{ unit.internal_product.name }}</h2>
+      </div>
+      <a class="btn" href="{% url 'shop_product' unit.internal_product_id %}">Xem sản phẩm</a>
+    </div>
+    <div class="demand-results">
+      <div class="demand-result">
+        <span>Nhu cầu dự đoán</span>
+        <strong>{% if selected_prediction.value %}{{ selected_prediction.value.nonnegative_value|number }}{% else %}Chưa có{% endif %}</strong>
+        <small>{{ unit.unit }}</small>
+      </div>
+      <div class="demand-result">
+        <span>Lượng bán thực tế</span>
+        <strong>{% if actual_known %}{{ actual|number }}{% else %}Chưa có{% endif %}</strong>
+        <small>{% if actual_known %}{{ unit.unit }}{% else %}Kỳ chưa có quan sát thực tế{% endif %}</small>
+      </div>
+      <div class="demand-result demand-difference">
+        <span>Chênh lệch so với thực tế</span>
+        <strong>{% if period_result.difference != None %}{{ period_result.difference|number }}{% else %}Chưa xác định{% endif %}</strong>
+        <small>{% if period_result.difference < 0 %}Dự đoán thấp hơn thực tế{% elif period_result.difference > 0 %}Dự đoán cao hơn thực tế{% elif period_result.difference == 0 %}Dự đoán bằng thực tế{% else %}Cần đủ dự đoán và thực tế{% endif %}</small>
+      </div>
+    </div>
+    <p class="demand-note">Dùng lịch sử đến hết {{ cutoff|date:'m/Y' }}. Số lượng dự đoán là kết quả theo tháng, chưa phải lượng cần đặt thêm.</p>
+    {% if readiness and not readiness.eligible %}
+    <p class="message warning">Chưa đủ lịch sử liên tục để dự đoán kỳ này.{% if readiness.missing_lags %} Thiếu dữ liệu tháng {{ readiness.missing_lags|join:', ' }}.{% endif %}</p>
+    {% endif %}
+    <div class="demand-actions">
+      {% if is_admin %}
+      <form method="post" data-research-run>
+        {% csrf_token %}
+        <input type="hidden" name="action" value="run">
+        <input type="hidden" name="dataset" value="{{ dataset.pk }}">
+        <input type="hidden" name="experiment" value="{{ experiment.pk }}">
+        <input type="hidden" name="target" value="{{ target|date:'Y-m' }}">
+        <input type="hidden" name="unit" value="{{ unit.pk }}">
+        <button class="btn" data-run-button>Cập nhật dự đoán</button>
+        <span class="research-run-status muted" role="status" data-run-status></span>
+      </form>
+      {% endif %}
+      <a class="btn" href="?{{ query }}&amp;export=product">Tải bảng đối chiếu</a>
+    </div>
+    <details class="demand-details">
+      <summary>Thông tin kỳ dự đoán</summary>
+      <p>Phương pháp: {{ selected_method|method_name }}. Kỳ kiểm định kết thúc {{ validation_end|date:'m/Y' }}.</p>
+      <p>Nguồn lịch sử 2022–2023. Tháng thiếu quan sát được giữ trống, chưa coi là lượng bán bằng 0.</p>
+      {% if published_run.completed_at %}<p>Cập nhật kết quả: {{ published_run.completed_at|date:'H:i d/m/Y' }}.</p>{% endif %}
+    </details>
+  </section>
+
+  <section class="panel padded">
+    <div class="panel-heading">
+      <div>
+        <h2>Dự đoán và thực tế qua các tháng</h2>
+        <p>Chênh lệch = Dự đoán − Thực tế. Dương là dự đoán dư, âm là dự đoán thiếu.</p>
+      </div>
+    </div>
+    <div class="demand-chart">{{ comparison_svg|safe }}</div>
+    <p class="demand-note">Tháng chưa có lượng bán thực tế được để trống; chưa tính chênh lệch. Dự đoán và thực tế được đối chiếu trên cùng một mã hàng, cùng đơn vị.</p>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Tháng</th><th class="num">Nhu cầu dự đoán</th><th class="num">Lượng bán thực tế</th><th class="num">Chênh lệch</th></tr></thead>
+        <tbody>
+          {% for row in comparison %}
+          <tr {% if row.month == target %}class="selected-period"{% endif %}>
+            <td>{{ row.month|date:'m/Y' }}{% if row.month == target %}<small>Kỳ đang xem</small>{% endif %}</td>
+            <td class="num">{{ row.forecast|number }}</td>
+            <td class="num">{{ row.actual|number }}</td>
+            <td class="num">{% if row.difference != None %}{{ row.difference|number }}{% else %}Chưa xác định{% endif %}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+  {% endif %}
+</div>
+{% endblock %}

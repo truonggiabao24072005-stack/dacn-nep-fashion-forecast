@@ -19,6 +19,8 @@ Cách phân chia trách nhiệm tham khảo `C:/MULTIPLEPLATFROM/lesson02/WebApp
 | sql/ | Lược đồ, truy vấn đối soát và công cụ phân quyền |
 | tools/ | Chạy web, kiểm tra tệp, quản lý PostgreSQL và kiểm chứng |
 
+Phần huấn luyện độc lập ở `../nghien_cuu/`: `du_lieu.py` đọc và kiểm tra dữ liệu, `train.py` điều phối huấn luyện và đánh giá, `huan_luyen_nhu_cau.ipynb` trình bày theo từng bước. `tools/train_forecast.py` là lệnh mở phần này từ website. Tính toán tạo mẫu, biến đổi và huấn luyện nằm chung trong `store/forecast/training.py`; `features.py` và `research.py` giữ giao diện gọi của nghiệp vụ website.
+
 ## Quy tắc đặt tên
 
 Tên tệp và hàm dùng snake_case; tên lớp dùng PascalCase. Biểu mẫu kết thúc bằng Form, lớp trang đăng nhập kết thúc bằng View. Ví dụ: `DocumentLineForm`, `ConfirmDocumentForm`, `CustomerRegistrationForm`, `EmployeeLoginView`.

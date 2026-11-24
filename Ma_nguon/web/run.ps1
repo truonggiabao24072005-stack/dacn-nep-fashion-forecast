@@ -1,8 +1,8 @@
-$ErrorActionPreference='Stop'
+﻿$ErrorActionPreference='Stop'
 $fashionRoot=$PSScriptRoot
 $fashionPython=Join-Path $fashionRoot '.venv\Scripts\python.exe'
 if(-not(Test-Path -LiteralPath $fashionPython)){throw 'Chưa có môi trường Python. Xem README.md để cài đặt.'}
-$fashionPgBin='C:\Program Files\PostgreSQL\18\bin'
+$fashionPgBin=if($env:PG_BIN){$env:PG_BIN}else{'C:\Program Files\PostgreSQL\18\bin'}
 $fashionPgData=Join-Path $fashionRoot '.runtime\pgdata'
 if(Test-Path -LiteralPath $fashionPgData){
  & "$fashionPgBin\pg_ctl.exe" -D $fashionPgData status 2>$null | Out-Null

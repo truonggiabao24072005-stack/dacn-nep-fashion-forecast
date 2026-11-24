@@ -168,6 +168,9 @@ def workspace(request):
         form.add_error(None, "Thao tác không hợp lệ.")
     selected_prediction = next((row for row in predictions if row["selected"]), None)
     comparison = comparison_rows(unit, models[selected], target) if unit and target else []
+    period_result = next((row for row in comparison if row["month"] == target), None)
+    if request.method == "GET" and data.get("export") == "product" and unit and target:
+        return export_product_comparison(unit, target, comparison)
     return render(
         request,
         "store/forecast/research.html",
@@ -180,6 +183,8 @@ def workspace(request):
             "unit": unit,
             "selected_prediction": selected_prediction,
             "comparison": comparison,
+            "period_result": period_result,
+            "published_run": runs.get(selected),
             "comparison_svg": comparison_svg(comparison) if comparison else "",
             "context_error": context_error,
             "runs": runs,
@@ -203,6 +208,26 @@ def workspace(request):
             },
         },
     )
+
+
+def export_product_comparison(unit, target, rows):
+    response = HttpResponse(content_type="text/csv; charset=utf-8")
+    response["Content-Disposition"] = f'attachment; filename="doi_chieu_nhu_cau_{target:%Y_%m}.csv"'
+    response.write("\ufeff")
+    writer = csv.writer(response)
+    writer.writerow(["Mã sản phẩm", "Tháng", "Dự đoán", "Thực tế", "Chênh lệch", "Đơn vị"])
+
+    def text(value):
+        return "'" + value if value and value[0] in "=+-@\t\r\n" else value
+
+    for row in rows:
+        writer.writerow([
+            text(unit.label), row["month"].strftime("%Y-%m"),
+            "" if row["forecast"] is None else row["forecast"],
+            "" if row["actual"] is None else row["actual"],
+            "" if row["difference"] is None else row["difference"], text(unit.unit),
+        ])
+    return response
 
 
 def export_comparison(dataset, target, runs):
