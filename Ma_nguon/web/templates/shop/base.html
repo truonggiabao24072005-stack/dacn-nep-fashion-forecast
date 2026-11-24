@@ -1,0 +1,62 @@
+{% load static %}<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#ffffff">
+  <meta name="description" content="Mua giày, dép và xăng đan tại Nếp. Tìm theo cỡ, màu và hàng còn. Đặt giao hàng hoặc nhận tại cửa hàng.">
+  <title>{{ title }} · Nếp</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap">
+  <link rel="stylesheet" href="{% static 'shop/shop.css' %}?v=20261108-source-catalog">
+  <link rel="stylesheet" href="{% static 'shop/readable.css' %}?v=20261024-accounts1">
+  <link rel="stylesheet" href="{% static 'shop/accounts.css' %}?v=20261024-1">
+  <link rel="stylesheet" href="{% static 'shop/storefront.css' %}?v=20261108-source-catalog">
+  <link rel="stylesheet" href="{% static 'shop/editorial.css' %}?v=20261120-refined">
+  <link rel="stylesheet" href="{% static 'shop/retail.css' %}?v=20261120-ega">
+  <script src="{% static 'shop/shop.js' %}?v=20261116-location" defer></script>
+  {% block head %}{% endblock %}
+</head>
+<body>
+<a class="skip-link" href="#content">Đến nội dung chính</a>
+<div class="announcement"><div class="container announcement-inner">
+  <span>Giao hàng hoặc nhận tại cửa hàng</span>
+  <a href="{% url 'shop_orders' %}">Theo dõi đơn hàng {% include 'shop/partials/icon.html' with name='arrow' %}</a>
+</div></div>
+<header class="shop-header"><div class="header-inner">
+  <button class="icon-button mobile-menu" data-menu-toggle aria-controls="main-nav" aria-expanded="false" aria-label="Mở danh mục">{% include 'shop/partials/icon.html' with name='menu' %}</button>
+  <a class="shop-logo" href="{% url 'shop_home' %}" aria-label="Nếp trang chủ">NẾP</a>
+  <nav id="main-nav" class="main-nav" aria-label="Danh mục chính">
+    <a href="{% url 'shop_catalogue' %}" {% if request.resolver_match.url_name == 'shop_catalogue' and not selected_category %}aria-current="page"{% endif %}>Tất cả</a>
+    {% for category in shop_categories %}<a href="{% url 'shop_catalogue' %}?category={{ category.code|urlencode }}" {% if selected_category == category.code %}aria-current="page"{% endif %}>{{ category.name }}</a>{% endfor %}
+    <a class="editorial-nav" href="{% url 'shop_news' %}" {% if request.resolver_match.url_name == 'shop_news' %}aria-current="page"{% endif %}>Tin tức</a>
+    <a class="nav-mobile-order" href="{% url 'shop_orders' %}">Đơn của tôi</a>
+  </nav>
+  <div class="header-actions">
+    <form class="header-search" role="search" method="get" action="{% url 'shop_catalogue' %}" aria-label="Tìm trong cửa hàng">
+      <label class="sr-only" for="header-search">Tên hoặc mã sản phẩm</label>
+      <input id="header-search" type="search" name="q" value="{{ q }}" placeholder="Tìm giày, dép, màu, cỡ hoặc mã..." maxlength="100">
+      <button type="submit" aria-label="Tìm">{% include 'shop/partials/icon.html' with name='search' %}</button>
+    </form>
+    <a class="icon-button header-search-link" href="{% url 'shop_catalogue' %}?focus=search" aria-label="Tìm sản phẩm">{% include 'shop/partials/icon.html' with name='search' %}</a>
+    <a class="account-nav" href="{% if shop_customer %}{% url 'shop_account' %}{% elif request.user.is_authenticated %}{% url 'dashboard' %}{% else %}{% url 'shop_login' %}?next={{ request.get_full_path|urlencode }}{% endif %}" aria-label="{% if shop_customer %}Tài khoản{% elif request.user.is_authenticated %}Quản lý{% else %}Đăng nhập{% endif %}">{% include 'shop/partials/icon.html' with name='user' %}<span>{% if shop_customer %}Tài khoản{% elif request.user.is_authenticated %}Quản lý{% else %}Đăng nhập{% endif %}</span></a>
+    <a class="bag-link" href="{% url 'shop_cart' %}" aria-label="Giỏ hàng có {{ bag_count }} sản phẩm">{% include 'shop/partials/icon.html' with name='bag' %}<span class="bag-count">{{ bag_count }}</span></a>
+  </div>
+</div></header>
+<main id="content">{% if messages %}<div class="flash-wrap container" aria-live="polite">{% for message in messages %}<div class="shop-flash {{ message.tags }}">{% include 'shop/partials/icon.html' with name='info' %}<span>{{ message }}</span></div>{% endfor %}</div>{% endif %}{% block content %}{% endblock %}</main>
+<section class="help-strip container" aria-label="Thông tin mua hàng">
+  <div>{% include 'shop/partials/icon.html' with name='package' %}<span><strong>Giao tận nơi</strong><small>Nhập địa chỉ ở bước đặt hàng</small></span></div>
+  <div>{% include 'shop/partials/icon.html' with name='pin' %}<span><strong>Nhận tại cửa hàng</strong><small>Xem hạn giữ sau khi đơn được tiếp nhận</small></span></div>
+  <div>{% include 'shop/partials/icon.html' with name='card' %}<span><strong>Thanh toán</strong><small>Xem phương thức hỗ trợ khi đặt hàng</small></span></div>
+</section>
+<footer class="shop-footer" id="ho-tro">
+  <div class="container footer-grid">
+    <div class="footer-brand">
+      <a class="shop-logo" href="{% url 'shop_home' %}">NẾP</a>
+      {% if shop_location %}{% include 'shop/partials/location.html' with location=shop_location only %}{% endif %}
+      <a href="{% url 'shop_about' %}">Về Nếp</a><a href="{% url 'shop_news' %}">Tin tức</a>
+    </div>
+    <div><h2>Sản phẩm</h2><a href="{% url 'shop_catalogue' %}">Tất cả sản phẩm</a>{% for category in shop_categories %}<a href="{% url 'shop_catalogue' %}?category={{ category.code|urlencode }}">{{ category.name }}</a>{% endfor %}</div>
+    <div><h2>Tài khoản và đơn hàng</h2><a href="{% url 'shop_account' %}">Tài khoản của tôi</a><a href="{% url 'shop_cart' %}">Giỏ hàng</a><a href="{% url 'shop_orders' %}">Theo dõi đơn hàng</a><a href="{% url 'dashboard' %}">Dành cho nhân viên</a></div>
+    <div class="footer-help"><h2>Thông tin mua hàng</h2><details><summary>Khi nào đơn được xác nhận?</summary><p>Cửa hàng kiểm tra hàng và tiếp nhận yêu cầu. Bạn xem trạng thái tại “Đơn của tôi”.</p></details><details><summary>Thanh toán như thế nào?</summary><p>Bước đặt hàng hiển thị các phương thức theo hình thức nhận. Nếu chọn VNPAY, bạn thanh toán từ trang đơn sau khi cửa hàng tiếp nhận.</p></details><details><summary>Đặt hàng có giữ hàng không?</summary><p>Đơn nhận tại cửa hàng và thanh toán tại quầy được giữ 48 giờ kể từ khi nhân viên tiếp nhận. Bạn xem hạn giữ trong chi tiết đơn.</p></details></div>
+  </div>
+  <div class="container footer-bottom"><span>© {% now 'Y' %} Nếp</span><a href="{% url 'shop_photo_sources' %}">Nguồn ảnh</a><a href="#content">Lên đầu trang ↑</a></div>
+</footer>
+</body></html>

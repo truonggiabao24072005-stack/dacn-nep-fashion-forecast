@@ -1,0 +1,27 @@
+{% extends 'store/shared/base.html' %}
+{% block heading_action %}<a class="btn primary" href="{% url 'shop_new_post' %}">+ Soạn tin</a>{% endblock %}
+{% block content %}
+<section class="panel">
+  <div class="table-scroll">
+    <table>
+      <thead><tr><th>Tiêu đề</th><th>Trạng thái</th><th>Cập nhật</th><th>Thao tác</th></tr></thead>
+      <tbody>
+        {% for post in page %}
+          <tr>
+            <td><strong>{{ post.title }}</strong></td>
+            <td>{% if post.published_at %}Đã đăng{% else %}Bản nháp{% endif %}</td>
+            <td>{{ post.updated_at|date:'d/m/Y H:i' }}</td>
+            <td><a href="{% url 'shop_edit_post' post.pk %}">Chỉnh sửa</a>
+              {% if post.published_at %}<small><a href="{% url 'shop_article' post.pk %}">Xem bài đăng</a></small>{% endif %}
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="4">Chưa có bài viết.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% include 'store/shared/pagination.html' %}
+</section>
+{% endblock %}
+

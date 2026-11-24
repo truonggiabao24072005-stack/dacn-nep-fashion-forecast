@@ -1,0 +1,11 @@
+{% extends 'store/shared/base.html' %}{% load display %}
+{% block content %}
+<p class="inventory-intro">Xem nhu cầu dự đoán của sản phẩm trong danh mục, đối chiếu với lượng bán thực tế theo tháng.</p>
+<section class="panel"><form class="toolbar" method="get">{% if selected %}<input type="hidden" name="dataset" value="{{ selected.pk }}">{% endif %}<input name="q" value="{{ q }}" aria-label="Tìm sản phẩm dự đoán" placeholder="Tìm tên hoặc mã sản phẩm…"><button class="btn">Tìm sản phẩm</button></form></section>
+{% if selected and run %}
+<p class="muted">Dự đoán tháng {{ run.target_month|date:'m/Y' }}, sử dụng lịch sử đến hết {{ run.cutoff_month|date:'m/Y' }}.{% if selected.source_type == 'RESEARCH' %} Đây là kỳ lịch sử của bộ dữ liệu, chưa dùng để nhập hàng cho tháng hiện tại.{% endif %}</p>
+<section class="panel"><div class="panel-heading"><h2>Nhu cầu sản phẩm tháng {{ run.target_month|date:'m/Y' }}</h2><span class="muted">{{ page.paginator.count }} sản phẩm</span></div><div class="table-scroll"><table><thead><tr><th>Sản phẩm</th><th class="num">Nhu cầu dự đoán</th><th>Đơn vị tính</th><th></th></tr></thead><tbody>
+{% for v in page %}<tr><td><strong>{% if v.forecast_unit.internal_product %}{{ v.forecast_unit.internal_product.name }}{% else %}{{ v.forecast_unit.label }}{% endif %}</strong><small>{{ v.forecast_unit.label }}</small></td><td class="num">{{ v.nonnegative_value|number }}</td><td>{{ v.forecast_unit.unit }}</td><td>{% if selected.source_type == 'RESEARCH' %}<a href="{% url 'research_workspace' %}?dataset={{ selected.pk }}&amp;experiment={{ run.model_result.experiment_id }}&amp;target={{ run.target_month|date:'Y-m' }}&amp;unit={{ v.forecast_unit_id }}">Xem dự đoán và thực tế ↗</a>{% else %}<a href="{% url 'forecast_detail' v.pk %}">Xem dự đoán và nhập hàng ↗</a>{% endif %}</td></tr>{% empty %}<tr><td colspan="4">Không có sản phẩm phù hợp.</td></tr>{% endfor %}
+</tbody></table></div>{% include 'store/shared/pagination.html' %}</section>
+{% else %}<section class="panel padded"><h2>Chưa có dự đoán</h2><p>Chưa có lần dự báo hoàn tất cho kỳ này. Chưa có dự đoán không có nghĩa nhu cầu bằng 0.</p></section>{% endif %}
+{% endblock %}

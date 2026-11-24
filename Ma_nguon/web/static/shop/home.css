@@ -1,0 +1,375 @@
+.nep-home {
+  padding-block: 18px clamp(36px, 5vw, 64px);
+}
+
+/* EGA Sneaker High-Contrast Athletic Hero Banner */
+.nep-hero {
+  display: grid;
+  overflow: hidden;
+  background: radial-gradient(circle at 76% 48%, #2a2a2e 0%, #141416 58%, #0d0d0f 100%);
+  border-radius: 14px;
+  color: #ffffff;
+}
+
+.nep-hero:has(.nep-hero-visual) {
+  grid-template-columns: minmax(0, 1.02fr) minmax(0, .98fr);
+  align-items: center;
+}
+
+.nep-hero-copy {
+  position: relative;
+  z-index: 1;
+  padding: clamp(28px, 4.5vw, 60px) clamp(20px, 3vw, 36px) clamp(28px, 4.5vw, 60px) clamp(28px, 5vw, 60px);
+}
+
+.nep-hero-badge {
+  display: inline-block;
+  padding: 5px 12px;
+  margin-bottom: 16px;
+  border-radius: 999px;
+  background: var(--ega-yellow);
+  color: #111111;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .08em;
+}
+
+.nep-hero h1 {
+  margin: 0;
+  font-size: clamp(30px, 3.8vw, 50px);
+  line-height: 1.12;
+  font-weight: 800;
+  letter-spacing: -.025em;
+  color: #ffffff;
+}
+
+.nep-hero-copy p {
+  margin: 16px 0 0;
+  max-width: 40ch;
+  font-size: 15px;
+  line-height: 1.65;
+  color: #c9c9ce;
+}
+
+.nep-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: 26px;
+}
+
+.button-ega {
+  background: var(--ega-red);
+  color: #ffffff;
+  border: 1px solid var(--ega-red);
+  font-weight: 700;
+  padding-inline: 24px;
+}
+.button-ega:hover {
+  background: var(--ega-red-dark);
+  border-color: var(--ega-red-dark);
+  color: #ffffff;
+}
+
+.button-ghost {
+  background: transparent;
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, .32);
+  font-weight: 600;
+  padding-inline: 20px;
+}
+.button-ghost:hover {
+  background: #ffffff;
+  color: #111111;
+  border-color: #ffffff;
+}
+
+/* Right Featured Sneaker Card */
+.nep-hero-visual {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  margin: clamp(16px, 2.6vw, 28px);
+  background: #ffffff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, .38);
+}
+
+.nep-hero-photo {
+  position: relative;
+  display: block;
+  aspect-ratio: 1.32;
+  min-height: 270px;
+  background: #f6f6f6;
+  overflow: hidden;
+}
+
+.nep-hero-photo img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 6%;
+  object-fit: contain;
+  mix-blend-mode: multiply;
+  transition: transform .4s cubic-bezier(.22, 1, .36, 1);
+}
+
+.nep-hero-photo:hover img { transform: scale(1.04); }
+
+.nep-hero-credit {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 6px 14px;
+  padding: 11px 18px;
+  background: #ffffff;
+  border-top: 1px solid #eeeeee;
+  font-size: 13px;
+  color: #555555;
+}
+
+.nep-hero-credit a {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  min-height: 26px;
+  color: inherit;
+}
+
+.nep-hero-credit a:first-child { font-weight: 700; color: #131313; }
+.nep-hero-credit a:first-child:hover { color: var(--ega-red); }
+.nep-hero-credit a:last-child { font-size: 12px; color: #888888; text-decoration: underline; text-underline-offset: 3px; }
+.nep-hero-credit .icon { width: 14px; height: 14px; }
+
+/* Section Headers (EGA Sneaker bold red accent bar + pill link) */
+.nep-section { margin-block: clamp(36px, 4.6vw, 60px) 0; }
+
+.nep-section-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 16px;
+  margin-bottom: 20px;
+}
+
+.nep-section h2 {
+  margin: 0;
+  padding-left: 13px;
+  border-left: 4px solid var(--ega-red);
+  font-size: clamp(19px, 1.9vw, 24px);
+  font-weight: 800;
+  line-height: 1.25;
+  letter-spacing: -.015em;
+  text-transform: uppercase;
+  color: #131313;
+}
+
+.nep-section-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 6px 16px;
+  border: 1px solid #131313;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #131313;
+  transition: background-color .16s ease, color .16s ease, border-color .16s ease;
+}
+
+.nep-section-link:hover {
+  background: #131313;
+  color: #ffffff;
+  text-decoration: none;
+}
+.nep-section-link .icon { width: 14px; height: 14px; }
+
+/* Collection / Category Grid (EGA Sneaker collection tiles) */
+.nep-category-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(12px, 1.8vw, 22px);
+}
+
+.nep-category-card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: #f5f5f5;
+  border: 1.5px solid #eeeeee;
+  border-radius: 12px;
+  transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+}
+
+.nep-category-card:hover {
+  border-color: var(--ega-red);
+  box-shadow: 0 10px 24px rgba(229, 49, 63, .08);
+  transform: translateY(-2px);
+}
+
+.nep-category-image {
+  aspect-ratio: 1.58;
+  overflow: hidden;
+  background: #f5f5f5;
+}
+
+.nep-category-image img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  padding: 6%;
+  object-fit: contain;
+  mix-blend-mode: multiply;
+  transition: transform .35s cubic-bezier(.22, 1, .36, 1);
+}
+
+.nep-category-card:hover .nep-category-image img { transform: scale(1.06); }
+
+.nep-category-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 13px 16px;
+  background: #ffffff;
+  border-top: 1px solid #eeeeee;
+  font-size: 15.5px;
+  line-height: 1.3;
+  color: #131313;
+}
+
+.nep-category-label strong { font-weight: 700; }
+
+.nep-arrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ega-red);
+  transition: transform .18s ease;
+}
+
+.nep-arrow .icon { width: 14px; height: 14px; }
+.nep-category-card:hover .nep-arrow { transform: translateX(3px); }
+
+/* Editorial / Lookbook Dual Banner */
+.nep-editorial {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
+  gap: 20px;
+}
+
+.nep-brand-panel,
+.nep-news-panel {
+  overflow: hidden;
+  border-radius: 12px;
+}
+
+.nep-brand-panel {
+  display: grid;
+  background: #f5f5f5;
+  border: 1px solid #eaeaea;
+}
+.nep-brand-panel:has(.nep-brand-media) {
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr);
+  align-items: center;
+}
+.nep-brand-media {
+  height: 100%;
+  min-height: 210px;
+  display: grid;
+  place-items: center;
+  background: #efefef;
+  padding: 16px;
+}
+.nep-brand-media img {
+  max-height: 200px;
+  width: 100%;
+  object-fit: contain;
+  mix-blend-mode: multiply;
+}
+.nep-brand-copy, .nep-news-panel { padding: clamp(24px, 3vw, 36px); }
+
+.nep-kicker {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  color: var(--ega-red);
+  margin-bottom: 8px;
+}
+.nep-kicker.light { color: var(--ega-yellow); }
+
+.nep-editorial h2 {
+  padding-left: 0;
+  border-left: 0;
+  text-transform: none;
+  font-size: clamp(20px, 1.9vw, 24px);
+  font-weight: 800;
+  margin: 0;
+}
+.nep-editorial p {
+  margin: 10px 0 18px;
+  max-width: 38ch;
+  font-size: 14px;
+  line-height: 1.65;
+  color: #555555;
+}
+
+.nep-news-panel {
+  background: #141416;
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.nep-news-panel h2 { color: #ffffff; }
+.nep-news-panel p { color: #c5c5cb; }
+
+.nep-editorial-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  width: max-content;
+  padding: 9px 18px;
+  border-radius: 999px;
+  background: #131313;
+  color: #ffffff;
+  font-size: 13.5px;
+  font-weight: 600;
+  transition: background-color .16s ease, color .16s ease;
+}
+.nep-editorial-cta:hover { background: var(--ega-red); color: #ffffff; text-decoration: none; }
+.nep-editorial-cta.light { background: #ffffff; color: #131313; }
+.nep-editorial-cta.light:hover { background: var(--ega-yellow); color: #111111; }
+.nep-editorial-cta .icon { width: 15px; height: 15px; }
+
+@media (max-width: 900px) {
+  .nep-hero:has(.nep-hero-visual) { grid-template-columns: minmax(0, 1fr); }
+  .nep-hero-copy { padding: 28px 22px 10px; }
+  .nep-hero-visual { margin: 14px 22px 22px; }
+  .nep-editorial { grid-template-columns: minmax(0, 1fr); }
+}
+
+@media (max-width: 560px) {
+  .nep-home { padding-top: 12px; }
+  .nep-hero-copy { padding: 22px 18px 8px; }
+  .nep-hero-copy p { font-size: 14px; margin-top: 10px; }
+  .nep-hero-actions { margin-top: 18px; gap: 10px; }
+  .nep-hero-actions .button { width: 100%; justify-content: center; }
+  .nep-hero-visual { margin: 12px 18px 18px; }
+  .nep-hero-photo { min-height: 210px; }
+  .nep-category-grid { gap: 10px; }
+  .nep-category-image { aspect-ratio: 1.1; }
+  .nep-category-label { padding: 10px; font-size: 13.5px; }
+  .nep-arrow { display: none; }
+  .nep-brand-panel:has(.nep-brand-media) { grid-template-columns: 1fr; }
+  .nep-brand-media { min-height: 160px; }
+  .nep-brand-copy, .nep-news-panel { padding: 20px; }
+}

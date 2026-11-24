@@ -1,0 +1,77 @@
+{% extends 'shop/base.html' %}
+{% load display %}
+{% block content %}
+<section class="container order-page">
+  <header class="order-thanks">
+    <p>{{ order.code }}</p>
+    <h1>Thông tin đơn hàng</h1>
+    <p class="order-status">{{ order.display_status }}</p>
+    {% if order.status == 'PENDING' %}
+      <p>Cửa hàng đang kiểm tra hàng và thông tin nhận.</p>
+    {% elif order.lifecycle_status == 'CORRECTED' %}
+      <p>Giao dịch gốc đã có chứng từ bù trừ. Vui lòng liên hệ cửa hàng để đối chiếu khoản thanh toán.</p>
+    {% elif order.lifecycle_status == 'SALE_CANCELLED' %}
+      <p>Đơn bán đã được hủy. Vui lòng liên hệ cửa hàng nếu cần kiểm tra.</p>
+    {% elif order.payment_preference == 'VNPAY' and order.lifecycle_status == 'ACCEPTED' %}
+      {% if order.gateway_payment.status == 'REVIEW' %}
+        <p>VNPAY đã báo thu tiền. Cửa hàng cần đối chiếu đơn. Vui lòng không thanh toán lại.</p>
+      {% elif order.gateway_payment.status == 'FAILED' %}
+        <p>Giao dịch chưa thành công. Liên hệ cửa hàng để được hỗ trợ.</p>
+      {% elif gateway_available %}
+        <form method="post" action="{% url 'vnpay_pay' order.pk %}">
+          {% csrf_token %}
+          <button class="button button-dark">Thanh toán {{ order.sale.total_amount|vnd }} đ qua VNPAY</button>
+        </form>
+      {% endif %}
+    {% elif order.lifecycle_status == 'ACCEPTED' %}
+      {% if order.pickup_expires_at %}<p>Hạn giữ hàng {{ order.pickup_expires_at|date:'H:i d/m/Y' }}. Sau thời điểm này, vui lòng liên hệ cửa hàng để đặt lại.</p>
+        {% else %}<p>Đơn đã được tiếp nhận. Bạn thanh toán khi đến nhận hàng.</p>{% endif %}
+    {% endif %}
+  </header>
+  <div class="order-content">
+    <div class="order-detail-lines">
+      <h2>Sản phẩm đã đặt</h2>
+      {% for line in order.lines.all %}
+        <div class="order-product">
+          <div><strong>{{ line.name_snapshot }}</strong>
+            <small>{{ line.variant_snapshot }} · Số lượng {{ line.quantity }}</small>
+          </div>
+          <span>{{ line.line_total|vnd }} đ</span>
+        </div>
+      {% endfor %}
+      <div class="summary-total"><span>Tạm tính khi gửi</span><strong>{{ order.total_amount|vnd }} đ</strong></div>
+      {% if order.sale_id and order.sale.total_amount != order.total_amount %}
+        <div class="summary-row"><span>Tổng đã xác nhận</span><strong>{{ order.sale.total_amount|vnd }} đ</strong></div>
+      {% endif %}
+    </div>
+    <aside class="order-contact">
+      <h2>Thông tin nhận hàng</h2>
+      <strong>{{ order.customer_name }}</strong>
+      <p>{{ order.phone }}</p>
+      {% if order.delivery_address %}
+        <p>Địa chỉ giao hàng</p>
+        <address class="shop-location">{{ order.delivery_address }}</address>
+      {% else %}
+        <p>Nhận tại cửa hàng</p>
+        {% include 'shop/partials/location.html' with location=order_pickup_location only %}
+      {% endif %}
+      {% if order.tracking_number %}<p>Mã vận đơn: <strong>{{ order.tracking_number }}</strong></p>{% endif %}
+      <p>{{ order.get_payment_preference_display }}</p>
+      {% if order.note %}<p>Lời nhắn: {{ order.note }}</p>{% endif %}
+      {% if order.reason %}<p>Lý do: {{ order.reason }}</p>{% endif %}
+      {% if order.status == 'PENDING' %}
+        <form method="post" action="{% url 'shop_cancel' order.pk %}">
+          {% csrf_token %}
+          <input type="hidden" name="version" value="{{ order.version }}">
+          <button class="small-text-button">Hủy yêu cầu đang chờ</button>
+        </form>
+      {% endif %}
+    </aside>
+  </div>
+  <div class="order-bottom-links">
+    <a class="button button-dark" href="{% url 'shop_catalogue' %}">Tiếp tục mua sắm</a>
+    <a class="text-link" href="{% url 'shop_orders' %}">Đơn của tôi</a>
+  </div>
+</section>
+{% endblock %}
+

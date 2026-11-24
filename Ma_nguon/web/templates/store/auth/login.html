@@ -1,0 +1,47 @@
+{% load static %}<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Đăng nhập · Nếp</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="{% static 'store/app.css' %}?v=20261120-refined">
+  <link rel="stylesheet" href="{% static 'store/management.css' %}?v=20261120-refined">
+</head>
+<body class="login-page">
+  <section class="login-story">
+    <div class="brand light"><span class="brand-icon">N</span><span>NẾP</span></div>
+    <div class="login-story-body">
+      <div class="eyebrow">HỆ THỐNG QUẢN LÝ BÁN LẺ</div>
+      <h1>Quản lý bán hàng,<br>kho và kế hoạch nhập.</h1>
+      <p>Theo dõi đơn hàng trực tuyến, chứng từ nhập xuất theo cỡ và màu, đối chiếu dự báo nhu cầu trước khi đặt hàng nhà cung cấp.</p>
+      <div class="fashion-art" aria-hidden="true">
+        <img src="{% static 'shop/images/source-catalog/MH03577/01-4926b65898fd.jpg' %}" alt="">
+      </div>
+    </div>
+    <small>Nếp · Đồ án chuyên ngành · Trương Gia Bảo</small>
+  </section>
+  <main class="login-panel">
+    <div class="login-box">
+      <div class="eyebrow">KHU VỰC NHÂN VIÊN</div>
+      <h2>Đăng nhập cửa hàng</h2>
+      <p class="muted">Sử dụng tài khoản nhân viên do quản trị viên cấp.</p>
+      <form method="post">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        {% for field in form %}
+          <div class="field">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}{{ field.errors }}
+          </div>
+        {% endfor %}
+        {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+        <button class="btn primary full">Đăng nhập <span>→</span></button>
+      </form>
+      <p class="login-help">Cần cấp lại mật khẩu? Liên hệ quản trị viên cửa hàng.</p>
+    </div>
+  </main>
+</body>
+</html>

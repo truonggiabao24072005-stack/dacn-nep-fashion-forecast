@@ -1,0 +1,69 @@
+{% extends 'shop/base.html' %}{% load static display %}
+{% block content %}
+<div class="container product-page">
+  <nav class="breadcrumb" aria-label="Đường dẫn"><a href="{% url 'shop_home' %}">Trang chủ</a><span>/</span><a href="{% url 'shop_catalogue' %}?category={{ product.category.code|urlencode }}">{{ product.category.name }}</a><span>/</span><span>{{ product.name }}</span></nav>
+  <div class="product-detail">
+    {% include 'shop/partials/gallery.html' %}
+    <section class="product-info" aria-labelledby="product-title">
+      <p class="product-code">{{ product.category.name }} <span aria-hidden="true">·</span> {{ product.code }}</p>
+      <h1 id="product-title">{{ product.name }}</h1>
+      <p class="detail-price" data-variant-price>{% if selected %}{{ selected.selling_price|vnd }} đ{% else %}Chưa mở bán{% endif %}</p>
+      {% if selected %}
+        <form action="{% url 'shop_cart_action' %}" method="post" data-product-form>
+          {% csrf_token %}
+          <input type="hidden" name="action" value="add">
+          <input type="hidden" name="variant_id" value="{{ selected.pk }}" data-variant-id disabled>
+          <div class="variant-select" data-variant-select>
+            <label for="variant-fallback">Chọn cỡ và màu</label>
+            <select name="variant_id" id="variant-fallback">
+              {% for v in product.shop_variants %}
+                <option value="{{ v.pk }}" {% if v.pk == selected.pk %}selected{% endif %} {% if not v.available_stock %}disabled{% endif %}>
+                  {{ v.size.name }} / {{ v.color.name }} · {% if v.available_stock %}Còn {{ v.available_stock }}{% else %}Hết hàng{% endif %}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+          <div data-variant-controls hidden>
+            <fieldset class="option-fieldset">
+              <legend>Màu sắc <span data-color-name>{{ selected.color.name }}</span></legend>
+              <div class="color-options">{% for c in product_colors %}<label class="color-option" style="--swatch:{{ c.hex }}">
+                <input type="radio" name="color_choice" value="{{ c.id }}" {% if selected.color_id == c.id %}checked{% endif %}>
+                <span class="color-circle"></span><span>{{ c.name }}</span>
+              </label>{% endfor %}</div>
+            </fieldset>
+            <fieldset class="option-fieldset">
+              <legend>Kích thước <a href="#size-guide">Hướng dẫn chọn cỡ</a></legend>
+              <div class="size-options">{% for s in product_sizes %}<label>
+                <input type="radio" name="size_choice" value="{{ s.id }}" {% if selected.size_id == s.id %}checked{% endif %}><span>{{ s.name }}</span>
+              </label>{% endfor %}</div>
+            </fieldset>
+          </div>
+          <p class="stock-status{% if not selected.available_stock %} unavailable{% endif %}" data-variant-stock aria-live="polite">{% if selected.available_stock %}Còn {{ selected.available_stock }} sản phẩm{% else %}Lựa chọn này tạm hết hàng{% endif %}</p>
+          <label class="quantity-label" for="product-quantity">Số lượng</label>
+          <div class="add-to-bag">
+            <div class="quantity-control">
+              <button type="button" data-qty="-1" aria-label="Giảm số lượng" hidden>−</button>
+              <input id="product-quantity" type="number" name="quantity" value="1" min="1" max="99" required data-quantity>
+              <button type="button" data-qty="1" aria-label="Tăng số lượng" hidden>+</button>
+            </div>
+            <button class="button button-dark" type="submit" data-add-button {% if not selected.available_stock %}disabled{% endif %}>Thêm vào giỏ {% include 'shop/partials/icon.html' with name='bag' %}</button>
+          </div>
+          <p class="variant-sku">Mã phân loại <span data-variant-sku>{{ selected.sku }}</span></p>
+        </form>
+        {{ variant_data|json_script:'product-variants' }}
+      {% endif %}
+      <div class="detail-benefits">
+        <div>{% include 'shop/partials/icon.html' with name='package' %}<span>Giao tận nơi hoặc nhận tại cửa hàng</span></div>
+        <div>{% include 'shop/partials/icon.html' with name='card' %}<span>Chọn phương thức thanh toán lúc đặt hàng</span></div>
+      </div>
+      <div class="product-accordions">
+        <details open><summary>Thông tin sản phẩm</summary><dl class="product-facts"><div><dt>Mã sản phẩm</dt><dd>{{ product.code }}</dd></div><div><dt>Danh mục</dt><dd>{{ product.category.name }}</dd></div><div><dt>Kích thước</dt><dd>{% for size in product_sizes %}{{ size.name }}{% if not forloop.last %}, {% endif %}{% empty %}Chưa mở bán{% endfor %}</dd></div><div><dt>Màu sắc</dt><dd>{% for color in product_colors %}{{ color.name }}{% if not forloop.last %}, {% endif %}{% empty %}Chưa mở bán{% endfor %}</dd></div><div><dt>Đơn vị bán</dt><dd>{{ product.unit }}</dd></div></dl></details>
+        {% if item.source %}<details><summary>Nguồn thông tin</summary><p>Mã {{ product.code }} được đối chiếu từ danh mục dữ liệu gốc theo nhóm, màu và cỡ. Ảnh Biti’s dùng tham khảo kiểu dáng; thương hiệu trong dữ liệu được giữ nguyên.</p><p>Giá bán hiển thị bằng đồng Việt Nam (VND), đã làm tròn theo nghìn đồng. Giá và tổng tiền được kiểm tra lại khi đặt hàng. Tình trạng còn hàng được quản lý riêng theo số dư kho của cửa hàng.</p></details>{% endif %}
+        <details id="size-guide"><summary>Hướng dẫn chọn kích thước</summary><p>Chọn cỡ và màu ở trên để xem số lượng còn hàng. Nếu chưa chắc cỡ phù hợp, bạn có thể để lại lời nhắn khi đặt hàng để cửa hàng xác nhận.</p></details>
+        <details><summary>Nhận hàng và thanh toán</summary><p>Chọn giao tận nơi hoặc nhận tại cửa hàng ở bước đặt hàng. Sau khi cửa hàng tiếp nhận, bạn có thể theo dõi trạng thái và hướng dẫn thanh toán trong “Đơn của tôi”.</p></details>
+      </div>
+    </section>
+  </div>
+  {% if related %}<section class="section"><div class="section-heading"><h2>Sản phẩm cùng danh mục</h2><a class="text-link" href="{% url 'shop_catalogue' %}?category={{ product.category.code|urlencode }}">Xem tất cả {% include 'shop/partials/icon.html' with name='arrow' %}</a></div><div class="product-grid">{% for item in related %}{% include 'shop/partials/card.html' %}{% endfor %}</div></section>{% endif %}
+</div>
+{% endblock %}

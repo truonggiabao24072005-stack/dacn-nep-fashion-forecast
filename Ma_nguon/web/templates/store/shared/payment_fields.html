@@ -1,0 +1,7 @@
+{{ confirm_form.version }}{{ confirm_form.request_key }}
+{{ confirm_form.non_field_errors }}
+{% if web_order %}<p>Khách dự kiến thanh toán: <strong>{{ web_order.get_payment_preference_display }}</strong>. Nếu khách đổi cách thanh toán tại quầy, ghi nhận theo số tiền và phương thức đã đối chiếu thực tế.</p>{% endif %}
+<fieldset class="payment-options"><legend>Phương thức thanh toán</legend>{{ confirm_form.method }}{{ confirm_form.method.errors }}</fieldset>
+<div data-payment-cash><label for="{{ confirm_form.cash_received.id_for_label }}">Tiền khách đưa (đồng)</label>{{ confirm_form.cash_received }}{{ confirm_form.cash_received.errors }}</div>
+<div data-payment-transfer><p>Chỉ xác nhận sau khi kiểm tra tiền đã vào tài khoản cửa hàng và khớp tổng đơn. Ảnh chụp chuyển khoản của khách chưa thay thế việc đối chiếu.</p><label class="checkbox-row">{{ confirm_form.transfer_ack }} Đã đối chiếu tiền nhận với tổng đơn</label>{{ confirm_form.transfer_ack.errors }}<label for="{{ confirm_form.reference.id_for_label }}">Tham chiếu khoản chuyển (nếu có)</label>{{ confirm_form.reference }}{{ confirm_form.reference.errors }}</div>
+<p class="payment-commit-note">Xác nhận thành công sẽ ghi khoản thu, trạng thái đã ghi sổ và xuất kho cùng một giao dịch trong cơ sở dữ liệu. Chọn phương thức hoặc tiếp nhận yêu cầu chưa làm giảm tồn.</p>

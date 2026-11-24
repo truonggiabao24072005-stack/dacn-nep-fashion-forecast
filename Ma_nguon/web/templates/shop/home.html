@@ -1,0 +1,101 @@
+{% extends 'shop/base.html' %}
+{% load static %}
+
+{% block head %}
+  <link rel="stylesheet" href="{% static 'shop/home.css' %}?v=20261120-ega">
+{% endblock %}
+
+{% block content %}
+<div class="nep-home">
+  <section class="nep-hero-wrap container" aria-labelledby="store-title">
+    <div class="nep-hero">
+      <div class="nep-hero-copy">
+        <span class="nep-hero-badge">BỘ SƯU TẬP HIỆN CÓ</span>
+        <h1 id="store-title">Giày, dép<br>cho mỗi ngày</h1>
+        <p>Giày thể thao, dép và xăng đan chọn theo đúng cỡ và màu. Đặt giao tận nơi hoặc giữ hàng nhận tại cửa hàng.</p>
+        <div class="nep-hero-actions">
+          <a class="button button-ega" href="{% url 'shop_catalogue' %}">Khám phá ngay {% include 'shop/partials/icon.html' with name='arrow' %}</a>
+          {% if featured %}<a class="button button-ghost" href="#dang-co-hang">Xem hàng còn</a>{% endif %}
+        </div>
+      </div>
+      {% if hero %}
+        <figure class="nep-hero-visual">
+          <a class="nep-hero-photo" href="{% url 'shop_product' hero.product.pk %}" aria-label="Xem {{ hero.product.name }}">
+            <img src="{% static hero.image %}" alt="Ảnh tham khảo {{ hero.product.name }}"
+              width="{{ hero.photo.width }}" height="{{ hero.photo.height }}" fetchpriority="high">
+          </a>
+          <figcaption class="nep-hero-credit">
+            <a href="{% url 'shop_product' hero.product.pk %}">{{ hero.product.name }} {% include 'shop/partials/icon.html' with name='diagonal' %}</a>
+            <a href="{{ hero.photo.source_page }}">Ảnh tham khảo</a>
+          </figcaption>
+        </figure>
+      {% endif %}
+    </div>
+  </section>
+
+  {% if category_cards %}
+    <section class="nep-section container" aria-labelledby="home-categories">
+      <div class="nep-section-heading">
+        <h2 id="home-categories">Danh mục nổi bật</h2>
+        <a class="nep-section-link" href="{% url 'shop_catalogue' %}">Tất cả sản phẩm {% include 'shop/partials/icon.html' with name='arrow' %}</a>
+      </div>
+      <div class="nep-category-grid">
+        {% for item in category_cards %}
+          <a class="nep-category-card" href="{% url 'shop_catalogue' %}?category={{ item.product.category.code|urlencode }}">
+            <div class="nep-category-image">
+              <img src="{% static item.image %}" alt="" width="{{ item.photo.width }}" height="{{ item.photo.height }}" loading="lazy">
+            </div>
+            <span class="nep-category-label">
+              <strong>{{ item.product.category.name }}</strong>
+              <span class="nep-arrow">Khám phá {% include 'shop/partials/icon.html' with name='arrow' %}</span>
+            </span>
+          </a>
+        {% endfor %}
+      </div>
+    </section>
+  {% endif %}
+
+  {% if featured %}
+    <section class="nep-section container" id="dang-co-hang" aria-labelledby="home-stock">
+      <div class="nep-section-heading">
+        <h2 id="home-stock">Đang có hàng</h2>
+        <a class="nep-section-link" href="{% url 'shop_catalogue' %}?stock=1">Xem tất cả {% include 'shop/partials/icon.html' with name='arrow' %}</a>
+      </div>
+      <div class="product-grid">{% for item in featured|slice:':4' %}{% include 'shop/partials/card.html' %}{% endfor %}</div>
+    </section>
+  {% endif %}
+
+  {% if collection %}
+    <section class="nep-section container" id="san-pham-moi" aria-labelledby="home-collection">
+      <div class="nep-section-heading">
+        <h2 id="home-collection">Mẫu mới bổ sung</h2>
+        <a class="nep-section-link" href="{% url 'shop_catalogue' %}?collection=1">Xem bộ sưu tập {% include 'shop/partials/icon.html' with name='arrow' %}</a>
+      </div>
+      <div class="product-grid">{% for item in collection %}{% include 'shop/partials/card.html' %}{% endfor %}</div>
+    </section>
+  {% endif %}
+
+  <section class="nep-section nep-editorial container" aria-label="Giới thiệu và cẩm nang mua sắm">
+    <article class="nep-brand-panel">
+      <div class="nep-brand-copy">
+        <span class="nep-kicker">CỬA HÀNG NẾP</span>
+        <h2>Về Nếp</h2>
+        <p>Cửa hàng giày, dép và xăng đan quản lý rõ theo từng cỡ và màu, dễ kiểm tra hàng còn trước khi đặt.</p>
+        <a class="nep-editorial-cta" href="{% url 'shop_about' %}">Tìm hiểu thêm {% include 'shop/partials/icon.html' with name='arrow' %}</a>
+      </div>
+      {% if story_photo %}
+        <div class="nep-brand-media">
+          <img src="{% static story_photo.image %}" alt="Ảnh tham khảo {{ story_photo.product.name }}"
+            width="{{ story_photo.photo.width }}" height="{{ story_photo.photo.height }}" loading="lazy">
+        </div>
+      {% endif %}
+    </article>
+    <article class="nep-news-panel">
+      <span class="nep-kicker light">TIN TỨC &amp; HƯỚNG DẪN</span>
+      <h2>Cẩm nang mua sắm</h2>
+      <p>Cách chọn đúng cỡ giày, kiểm tra hàng còn tại cửa hàng và theo dõi trạng thái đơn đã đặt.</p>
+      <a class="nep-editorial-cta light" href="{% url 'shop_news' %}">Xem bài viết {% include 'shop/partials/icon.html' with name='arrow' %}</a>
+    </article>
+  </section>
+</div>
+{% endblock %}

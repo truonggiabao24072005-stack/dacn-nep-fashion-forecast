@@ -1,0 +1,21 @@
+{% extends 'shop/base.html' %}
+{% block content %}
+<section class="auth-page">
+  <div class="container auth-container">
+    <a class="auth-back" href="{% url 'shop_home' %}">← Về cửa hàng</a>
+    <div class="auth-card">
+      <div class="eyebrow">TÀI KHOẢN NẾP</div>
+      <h1>{% if auth_mode == 'register' %}Đăng ký tài khoản{% elif auth_mode == 'password' %}Đổi mật khẩu{% else %}Đăng nhập{% endif %}</h1>
+      <p class="auth-intro">{% if auth_mode == 'register' %}Tạo tài khoản để theo dõi đơn hàng và lưu thông tin cho lần mua sau.{% elif auth_mode == 'password' %}Nhập mật khẩu hiện tại và chọn mật khẩu mới cho tài khoản của bạn.{% else %}Nhập tên đăng nhập và mật khẩu để xem thông tin tài khoản, theo dõi đơn hàng.{% endif %}</p>
+      {% if auth_mode != 'password' %}<nav class="auth-tabs" aria-label="Tài khoản"><a href="{% url 'shop_login' %}?next={{ next|urlencode }}" {% if auth_mode == 'login' %}aria-current="page"{% endif %}>Đăng nhập</a><a href="{% url 'shop_register' %}?next={{ next|urlencode }}" {% if auth_mode == 'register' %}aria-current="page"{% endif %}>Đăng ký</a></nav>{% endif %}
+      <form method="post" class="auth-form">
+        {% csrf_token %}{% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+        {% include 'shop/partials/form_fields.html' %}
+        <button class="button button-dark full-width" type="submit">{% if auth_mode == 'register' %}Tạo tài khoản{% elif auth_mode == 'password' %}Lưu mật khẩu mới{% else %}Đăng nhập{% endif %}{% include 'shop/partials/icon.html' with name='arrow' %}</button>
+      </form>
+      {% if auth_mode == 'password' %}<p class="auth-switch"><a href="{% url 'shop_account' %}">← Về tài khoản</a></p>{% elif auth_mode == 'register' %}<p class="auth-switch">Đã có tài khoản? <a href="{% url 'shop_login' %}?next={{ next|urlencode }}">Đăng nhập</a></p>{% else %}<p class="auth-switch">Chưa có tài khoản? <a href="{% url 'shop_register' %}?next={{ next|urlencode }}">Tạo tài khoản</a></p>{% endif %}
+    </div>
+
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,12 @@
+{% if location %}
+  <address class="shop-location">
+    <span>{{ location.address }}</span>
+    {% if location.is_example %}<small>Địa chỉ minh họa cho đồ án</small>{% endif %}
+    {% if location.map_url %}
+      <a href="{{ location.map_url }}" target="_blank" rel="noopener noreferrer">
+        {% if location.is_example %}Xem trên Google Maps{% else %}Chỉ đường trên Google Maps{% endif %}
+        {% include 'shop/partials/icon.html' with name='diagonal' %}
+      </a>
+    {% endif %}
+  </address>
+{% endif %}

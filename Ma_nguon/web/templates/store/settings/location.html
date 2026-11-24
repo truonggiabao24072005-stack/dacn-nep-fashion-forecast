@@ -1,0 +1,19 @@
+{% extends 'store/shared/base.html' %}
+{% block content %}
+<div class="form-layout">
+  <section class="panel form-panel">
+    <form method="post">
+      {% csrf_token %}
+      {% include 'store/shared/form_fields.html' %}
+      <div class="form-actions">
+        <button class="btn primary" type="submit">Lưu địa chỉ</button>
+        <a class="btn" href="{% url 'shop_about' %}#dia-chi">Xem trên website</a>
+      </div>
+    </form>
+  </section>
+  <aside class="help-note">
+    <h3>Hiển thị trên website</h3>
+    <p>Địa chỉ xuất hiện ở trang giới thiệu, chân trang và bước đặt hàng. Đơn nhận tại cửa hàng lưu lại địa chỉ vào lúc khách gửi đơn.</p>
+  </aside>
+</div>
+{% endblock %}

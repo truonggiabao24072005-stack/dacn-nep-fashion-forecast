@@ -1,0 +1,20 @@
+{% extends 'store/shared/base.html' %}
+{% block heading_action %}{% if is_admin %}<a class="btn" href="{% url 'document_new' 'adjustment' %}">{% include 'store/shared/icon.html' with name='check' %} Tạo phiếu kiểm đếm</a>{% endif %}{% endblock %}
+{% block content %}
+<p class="inventory-intro">Số dư đọc lúc {{ as_of|date:'d/m/Y H:i:s' }}. Mặc định hiển thị danh mục đang mở bán giống trang bán hàng. Chọn mọi biến thể để đối chiếu cả hàng đã ngừng kinh doanh; hàng này vẫn giữ chứng từ và sổ kho.</p>
+<section class="panel">
+<form class="toolbar" method="get">
+<input name="q" value="{{ q }}" placeholder="Tìm mã, tên, cỡ hoặc màu…" aria-label="Tìm hàng">
+<select name="mode" aria-label="Phạm vi tồn kho">
+<option value="active" {% if mode == 'active' %}selected{% endif %}>Danh mục đang mở bán</option>
+<option value="all" {% if mode == 'all' or not mode %}selected{% endif %}>Mọi biến thể, gồm hàng ngừng bán</option>
+<option value="unavailable" {% if mode == 'unavailable' %}selected{% endif %}>Chưa đủ điều kiện bán</option>
+<option value="out" {% if mode == 'out' %}selected{% endif %}>Đang mở bán nhưng hết hàng</option>
+<option value="low" {% if mode == 'low' %}selected{% endif %}>Tồn thấp theo ngưỡng</option>
+<option value="unconfigured" {% if mode == 'unconfigured' %}selected{% endif %}>Chưa cấu hình ngưỡng</option>
+</select><button class="btn primary">Lọc tồn</button><span class="muted">{{ page.paginator.count }} biến thể</span>
+</form>
+<div class="table-scroll"><table><thead><tr><th>Sản phẩm / mã</th><th>Kích thước</th><th>Màu sắc</th><th class="num">Tồn hiện tại</th><th class="num">Tồn bán được</th><th class="num">Ngưỡng</th><th>Tình trạng</th>{% if can_receive %}<th></th>{% endif %}</tr></thead><tbody>
+{% for b in page %}<tr><td><strong>{{ b.variant.product.name }}</strong><small class="mono">{{ b.variant.sku }}</small></td><td>{{ b.variant.size.name }}</td><td>{{ b.variant.color.name }}</td><td class="num"><strong>{{ b.quantity }}</strong> {{ b.variant.product.unit }}</td><td class="num">{% if b.variant_id in sellable_variant_ids %}{{ b.quantity }}{% else %}0{% endif %} {{ b.variant.product.unit }}</td><td class="num">{{ b.variant.low_stock_threshold|default_if_none:'Chưa cấu hình' }}</td><td>{% if b.variant_id not in sellable_variant_ids %}<span class="badge">Không đủ điều kiện bán</span>{% elif b.quantity == 0 %}<span class="badge warn">Hết hàng</span>{% elif b.variant.low_stock_threshold is not None and b.quantity <= b.variant.low_stock_threshold %}<span class="badge warn">Tồn thấp</span>{% else %}<span class="badge posted">Đang theo dõi</span>{% endif %}</td>{% if can_receive %}<td><a href="{% url 'ledger' b.variant_id %}">Sổ biến động ↗</a></td>{% endif %}</tr>{% empty %}<tr><td colspan="8" class="empty">Không có biến thể phù hợp với phạm vi đang chọn.</td></tr>{% endfor %}
+</tbody></table></div>{% include 'store/shared/pagination.html' %}</section>
+{% endblock %}

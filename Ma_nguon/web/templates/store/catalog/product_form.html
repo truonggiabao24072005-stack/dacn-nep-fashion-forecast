@@ -1,0 +1,52 @@
+{% extends 'store/shared/base.html' %}
+{% load static %}
+{% block extra_head %}
+  <link rel="stylesheet" href="{% static 'store/product-form.css' %}">
+{% endblock %}
+{% block content %}
+<div class="product-editor">
+  <section class="panel product-editor-main">
+    {% if parent_product %}
+      <p class="product-editor-label">SẢN PHẨM ĐANG THÊM BIẾN THỂ</p>
+      <h2>{{ parent_product.name }}</h2>
+      <p class="muted">{{ parent_product.code }} · {{ parent_product.category.name }}</p>
+    {% elif kind == 'products' %}
+      <h2>Thông tin sản phẩm</h2>
+      <p class="muted">Dùng một mã sản phẩm chung cho các cỡ và màu của cùng một mẫu.</p>
+    {% else %}
+      <h2>Thông tin biến thể</h2>
+      <p class="muted">Mỗi tổ hợp cỡ và màu có một mã riêng để theo dõi giá và tồn kho.</p>
+    {% endif %}
+    <form method="post">
+      {% csrf_token %}
+      <div class="product-editor-fields">
+        {% include 'store/shared/form_fields.html' %}
+      </div>
+      <div class="form-actions product-editor-actions">
+        {% if not editing and kind == 'products' %}
+          <button class="btn primary" name="next_step" value="variant">Lưu và thêm biến thể</button>
+          <button class="btn">Chỉ lưu sản phẩm</button>
+        {% elif not editing and kind == 'variants' %}
+          <button class="btn primary">Lưu biến thể</button>
+          <button class="btn" name="next_step" value="another_variant">Lưu và thêm cỡ hoặc màu khác</button>
+        {% else %}
+          <button class="btn primary">Lưu thay đổi</button>
+        {% endif %}
+        <a class="btn" href="{{ back }}">Quay lại</a>
+      </div>
+    </form>
+  </section>
+  <aside class="panel product-editor-guide" aria-labelledby="product-editor-guide-title">
+    <h2 id="product-editor-guide-title">Đưa hàng lên web</h2>
+    <ol>
+      <li><strong>Tạo sản phẩm</strong><span>Chọn danh mục, thương hiệu và đơn vị bán.</span></li>
+      <li><strong>Thêm cỡ và màu</strong><span>Nhập mã biến thể và giá bán cho từng lựa chọn.</span></li>
+      <li><strong>Ghi nhận hàng nhập</strong><span>Biến thể mới có tồn bằng 0. Số lượng bán được cập nhật khi xác nhận phiếu nhập.</span></li>
+    </ol>
+    {% if can_receive %}
+      <a href="{% url 'documents' 'receipt' %}">Mở trang nhập hàng →</a>
+    {% endif %}
+  </aside>
+</div>
+{% endblock %}
+

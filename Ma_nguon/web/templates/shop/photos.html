@@ -1,0 +1,8 @@
+{% extends 'shop/base.html' %}{% load static %}{% block content %}
+<section class="container photo-sources-page">
+  <nav class="breadcrumb" aria-label="Đường dẫn"><a href="{% url 'shop_home' %}">Trang chủ</a><span>/</span><span>Nguồn ảnh</span></nav>
+  <div class="photo-sources-intro"><div class="eyebrow">NGUỒN ẢNH SẢN PHẨM</div><h1>Ảnh chụp và nguồn tham khảo</h1><p>Mỗi sản phẩm có ba ảnh chụp riêng từ website Biti’s, được lưu tại website này. Ảnh được chọn theo nhóm giày, dép, xăng đan, màu và nam/nữ của danh mục nguồn.</p><p>Bộ dữ liệu gốc không cung cấp ảnh. Đây là ảnh tham khảo, chưa được xác nhận là ảnh của đúng mã hàng gốc. Bản quyền ảnh thuộc Biti’s; đường dẫn nguồn được ghi dưới từng ảnh.</p></div>
+  <div class="photo-sources-grid">{% for photo in photos %}
+    <article class="photo-source"><a class="photo-source-picture" href="{{ photo.source_page }}" target="_blank" rel="noopener noreferrer" aria-label="Xem nguồn ảnh: {{ photo.label }}"><img src="{% static photo.static_path %}" alt="{{ photo.label }} — {{ photo.author }}" width="{{ photo.width }}" height="{{ photo.height }}" loading="lazy"></a><h2>{{ photo.label }}</h2><p>Ảnh: <strong>{{ photo.author }}</strong> / {{ photo.platform }}</p><div class="photo-source-links"><a href="{{ photo.source_page }}" target="_blank" rel="noopener noreferrer">Xem nguồn ảnh ↗</a><a href="{{ photo.licence_url }}" target="_blank" rel="noopener noreferrer">{{ photo.licence }} ↗</a></div></article>
+  {% endfor %}</div>
+</section>{% endblock %}

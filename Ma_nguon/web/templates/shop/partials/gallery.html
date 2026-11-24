@@ -1,0 +1,40 @@
+{% load static %}
+<div class="product-gallery" data-product-gallery>
+  {% if item.image %}
+    <div class="gallery-stage">
+      <button type="button" class="gallery-main" data-open-image aria-label="Phóng to ảnh {{ product.name }}">
+        <img data-gallery-main src="{% static item.image %}" alt="Ảnh chụp tham khảo {{ product.name }}" fetchpriority="high" width="{{ item.photo.width }}" height="{{ item.photo.height }}">
+        <span class="zoom-label">Xem gần hơn +</span>
+      </button>
+      {% if item.gallery|length > 1 %}
+        <button type="button" class="gallery-arrow gallery-prev" data-gallery-prev aria-label="Ảnh trước">‹</button>
+        <button type="button" class="gallery-arrow gallery-next" data-gallery-next aria-label="Ảnh tiếp theo">›</button>
+      {% endif %}
+    </div>
+    {% if item.gallery|length > 1 %}
+      <div class="gallery-status"><span data-gallery-label>Ảnh chính</span><span data-gallery-count aria-live="polite" aria-atomic="true">1 / {{ item.gallery|length }}</span></div>
+      <div class="gallery-thumbnails" role="group" aria-label="Các ảnh của {{ product.name }}">
+        {% for photo in item.gallery %}
+          <button type="button" class="gallery-thumbnail" data-gallery-thumb data-gallery-src="{% static photo.static_path %}"
+            data-gallery-alt="{{ product.name }} — {{ photo.view_label|default:'Ảnh chính' }}" data-gallery-label="{{ photo.view_label|default:'Ảnh chính' }}"
+            data-gallery-source="{{ photo.source_page }}" data-gallery-credit="{{ photo.author }}{% if photo.author != photo.platform %} / {{ photo.platform }}{% endif %}"
+            aria-label="Xem ảnh {{ forloop.counter }}: {{ photo.view_label|default:'Ảnh chính' }}" aria-current="{% if forloop.first %}true{% else %}false{% endif %}">
+            <img src="{% static photo.static_path %}" alt="" width="{{ photo.width }}" height="{{ photo.height }}" loading="lazy">
+            <span>{{ photo.view_label|default:'Ảnh chính' }}</span>
+          </button>
+        {% endfor %}
+      </div>
+      <noscript><p class="gallery-direct-links">{% for photo in item.gallery %}<a href="{% static photo.static_path %}">Xem ảnh {{ forloop.counter }}</a> {% endfor %}</p></noscript>
+    {% endif %}
+    <dialog class="image-dialog" id="product-image-dialog">
+      <button type="button" class="dialog-close icon-button" data-close-dialog aria-label="Đóng ảnh">{% include 'shop/partials/icon.html' with name='close' %}</button>
+      <img data-gallery-zoom src="{% static item.image %}" alt="Ảnh chụp phóng to {{ product.name }}">
+      {% if item.gallery|length > 1 %}
+        <div class="dialog-gallery-controls"><button type="button" data-gallery-prev aria-label="Ảnh trước khi phóng to">← Trước</button><span data-gallery-count>1 / {{ item.gallery|length }}</span><button type="button" data-gallery-next aria-label="Ảnh tiếp theo khi phóng to">Tiếp →</button></div>
+      {% endif %}
+    </dialog>
+  {% else %}
+    <div class="gallery-main no-photo">{{ product.name }}<small>Chưa có ảnh sản phẩm</small></div>
+  {% endif %}
+  <p class="image-caption">{% if item.photo %}Ảnh tham khảo: <a data-gallery-source-link href="{{ item.photo.source_page }}" target="_blank" rel="noopener noreferrer">{{ item.photo.author }}{% if item.photo.author != item.photo.platform %} / {{ item.photo.platform }}{% endif %}</a>. {% endif %}{% if item.source %}Ảnh tham khảo theo nhóm và màu, chưa xác nhận là ảnh của mã nguồn.{% else %}Chọn màu ở phần đặt hàng.{% endif %}</p>
+</div>

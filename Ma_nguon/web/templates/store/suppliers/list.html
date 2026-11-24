@@ -1,0 +1,16 @@
+{% extends 'store/shared/base.html' %}
+{% block heading_action %}<a class="btn primary" href="{% url 'supplier_order_new' %}">Ghi đơn đã đặt</a>{% endblock %}
+{% block content %}
+<p class="inventory-intro">Theo dõi hàng nhà cung cấp đã xác nhận theo từng mã biến thể.</p>
+<section class="panel"><div class="table-scroll">
+  <table>
+    <thead><tr><th>Tham chiếu</th><th>Nhà cung cấp</th><th>SKU</th><th class="num">SL đặt</th><th>Dự kiến nhận</th></tr></thead>
+    <tbody>{% for order in page %}<tr>
+      <td><a href="{% url 'supplier_order' order.pk %}">{{ order.reference }}</a></td>
+      <td>{{ order.supplier.name }}</td><td>{{ order.variant.sku }}</td>
+      <td class="num">{{ order.ordered_qty }}</td><td>{{ order.expected_on|date:'d/m/Y' }}</td>
+    </tr>{% empty %}<tr><td colspan="5">Chưa có đơn đặt nhà cung cấp.</td></tr>{% endfor %}</tbody>
+  </table>
+</div>{% include 'store/shared/pagination.html' %}</section>
+{% endblock %}
+

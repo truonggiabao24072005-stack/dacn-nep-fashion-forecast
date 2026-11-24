@@ -1,0 +1,13 @@
+{% extends 'shop/base.html' %}{% load display %}
+{% block content %}
+<section class="container account-page">
+  <div class="breadcrumb"><a href="{% url 'shop_home' %}">Trang chủ</a><span>/</span><span>Tài khoản</span></div>
+  <h1>Tài khoản của tôi</h1>
+  <p class="intro-copy">Thông tin liên hệ và những đơn hàng của bạn tại Nếp.</p>
+  <div class="account-layout">
+    <aside class="account-sidebar"><div class="account-identity">{% include 'shop/partials/icon.html' with name='user' %}<strong>{{ request.user.username }}</strong><span>Tài khoản khách hàng</span></div><a href="{% url 'shop_orders' %}">Đơn của tôi <span>{{ order_count }}</span></a><a href="{% url 'shop_password' %}">Đổi mật khẩu ↗</a><form method="post" action="{% url 'shop_logout' %}">{% csrf_token %}<button type="submit">Đăng xuất ↗</button></form></aside>
+    <div class="account-main"><section class="account-panel"><h2>Thông tin của bạn</h2><p class="field-help">Dùng để cửa hàng liên hệ xác nhận đơn và điền sẵn cho lần đặt hàng tiếp theo.</p><form method="post" class="account-form">{% csrf_token %}{% include 'shop/partials/form_fields.html' %}<button type="submit" class="button button-dark">Lưu thông tin {% include 'shop/partials/icon.html' with name='arrow' %}</button></form></section>
+    <section class="account-panel"><div class="account-section-heading"><h2>Đơn gần đây</h2><a href="{% url 'shop_orders' %}" class="text-link">Xem tất cả →</a></div>{% for order in recent_orders %}<a class="account-recent-order" href="{% url 'shop_order' order.pk %}"><div><strong>{{ order.code }}</strong><small>{{ order.created_at|date:'d/m/Y · H:i' }}</small></div><span class="order-status {{ order.status|lower }}">{{ order.display_status }}</span><strong>{{ order.total_amount|vnd }} đ</strong></a>{% empty %}<p class="account-empty">Bạn chưa có đơn nào. <a href="{% url 'shop_catalogue' %}">Xem sản phẩm →</a></p>{% endfor %}</section></div>
+  </div>
+</section>
+{% endblock %}

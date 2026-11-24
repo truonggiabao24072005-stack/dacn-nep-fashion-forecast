@@ -1,0 +1,63 @@
+{% extends 'shop/base.html' %}
+{% load static display %}
+{% block head %}<link rel="stylesheet" href="{% static 'store/payment.css' %}?v=20261120-refined">{% endblock %}
+{% block content %}
+<section class="container checkout-page">
+  <nav class="checkout-steps" aria-label="Các bước đặt hàng">
+    <a href="{% url 'shop_cart' %}">01 · Giỏ hàng</a>
+    <span aria-current="step">02 · Đặt hàng</span>
+    <span>03 · Theo dõi đơn</span>
+  </nav>
+  <div class="checkout-layout">
+    <section class="checkout-form-panel">
+      <h1>Thông tin đặt hàng</h1>
+      {% if not request.user.is_authenticated %}
+        <p><a href="{% url 'shop_login' %}?next={{ request.path|urlencode }}">Đăng nhập</a> để lưu đơn trong tài khoản.</p>
+      {% endif %}
+      <form method="post" class="checkout-form">
+        {% csrf_token %}
+        {{ form.request_key }}{{ form.quote }}
+        {{ form.request_key.errors }}{{ form.quote.errors }}
+        {{ form.non_field_errors }}
+        <h2>Thông tin nhận hàng</h2>
+        {% for field in form.visible_fields %}
+          {% if field.name != 'payment_method' %}
+            <div class="shop-form-field">
+              {{ field.label_tag }}{{ field }}{{ field.errors }}
+              {% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}
+            </div>
+          {% endif %}
+        {% endfor %}
+        {% if shop_location %}
+          <section class="shop-location-panel" data-pickup-location {% if form.delivery_address.value %}hidden{% endif %} aria-labelledby="pickup-location-title">
+            <h3 id="pickup-location-title">Địa chỉ nhận tại cửa hàng</h3>
+            {% include 'shop/partials/location.html' with location=shop_location only %}
+          </section>
+        {% endif %}
+        <fieldset class="payment-options">
+          <legend>{{ form.payment_method.label }}</legend>
+          {{ form.payment_method }}{{ form.payment_method.errors }}
+        </fieldset>
+        <p class="checkout-disclosure">Cửa hàng kiểm tra hàng và xác nhận đơn trước khi thu tiền. Nếu chọn VNPAY, bạn sẽ thanh toán từ trang đơn hàng sau khi đơn được tiếp nhận.</p>
+        <button class="button button-dark full-width" {% if not ready %}disabled{% endif %}>Gửi đơn hàng</button>
+        <a class="return-cart" href="{% url 'shop_cart' %}">Quay lại giỏ hàng</a>
+      </form>
+    </section>
+    <aside class="order-summary checkout-summary">
+      <h2>Tóm tắt đơn hàng</h2>
+      {% for row in rows %}
+        <div class="checkout-line">
+          {% if row.image %}<img src="{% static row.image %}" alt="{{ row.variant.product.name }}">{% endif %}
+          <div><strong>{{ row.variant.product.name }}</strong>
+            <small>{{ row.variant.color.name }} / {{ row.variant.size.name }} · SL {{ row.quantity }}</small>
+            {% if row.error %}<p class="inline-error">{{ row.error }}</p>{% endif %}
+          </div>
+          <span>{{ row.line_total|vnd }} đ</span>
+        </div>
+      {% endfor %}
+      <div class="summary-total"><span>Tạm tính</span><strong>{{ total|vnd }} đ</strong></div>
+    </aside>
+  </div>
+</section>
+{% endblock %}
+

@@ -1,0 +1,30 @@
+{% extends 'shop/base.html' %}
+{% block content %}
+<section class="container editorial-page">
+  <header class="editorial-header">
+    <p class="store-name">TỪ CỬA HÀNG</p>
+    <h1>Tin tức</h1>
+    <p>Mẫu mới, hướng dẫn mua hàng và các cập nhật từ Nếp.</p>
+  </header>
+  <div class="editorial-columns">
+    {% for post in page %}
+      <article>
+        <p class="editorial-date">{{ post.published_at|date:'d/m/Y' }}</p>
+        <h2><a href="{% url 'shop_article' post.pk %}">{{ post.title }}</a></h2>
+        <p>{{ post.summary }}</p>
+        <a class="text-link" href="{% url 'shop_article' post.pk %}">Đọc bài →</a>
+      </article>
+    {% empty %}
+      <p>Hiện chưa có tin mới.</p>
+    {% endfor %}
+  </div>
+  {% if page.has_other_pages %}
+    <nav class="editorial-pagination" aria-label="Phân trang tin tức">
+      {% if page.has_previous %}<a href="?page={{ page.previous_page_number }}">Trang trước</a>{% endif %}
+      <span>{{ page.number }} / {{ page.paginator.num_pages }}</span>
+      {% if page.has_next %}<a href="?page={{ page.next_page_number }}">Trang sau</a>{% endif %}
+    </nav>
+  {% endif %}
+</section>
+{% endblock %}
+

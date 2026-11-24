@@ -1,0 +1,28 @@
+{% extends 'store/shared/base.html' %}
+{% load display %}
+{% block content %}
+<div class="two-columns">
+  <section class="panel padded">
+    <h2>Thông tin từng cỡ và màu</h2>
+    <p>Tốc độ bán lấy từ 30 ngày trọn vẹn gần nhất. Dự kiến trong thời gian chờ giao được tính theo tốc độ này.</p>
+    <form method="get">{% include 'store/shared/form_fields.html' %}<button class="btn primary">Tính lượng nhập</button></form>
+  </section>
+  {% if result %}
+  <section class="panel padded">
+    <h2>{{ result.variant.sku }}</h2>
+    <p>{{ result.variant.product.name }} · {{ result.variant.size.name }} / {{ result.variant.color.name }}</p>
+    <dl>
+      <dt>Bán trong 30 ngày</dt><dd>{{ result.monthly }}</dd>
+      <dt>Dự kiến bán trong thời gian chờ</dt><dd>{{ result.lead_demand|floatformat:2 }}</dd>
+      <dt>Đang giữ cho khách</dt><dd>{{ result.held }}</dd>
+      <dt>Tồn có thể bán</dt><dd>{{ result.available }}</dd>
+      <dt>Lượng cần trước khi trừ hàng đang về</dt><dd>{{ result.gross }}</dd>
+      <dt>Đang về trong thời gian chờ</dt><dd>{{ result.incoming }}</dd>
+      <dt><strong>Lượng nên đặt thêm</strong></dt><dd><strong>{{ result.quantity }}</strong></dd>
+    </dl>
+    <a class="btn" href="{% url 'supplier_orders' %}">Đối chiếu đơn nhà cung cấp</a>
+  </section>
+  {% endif %}
+</div>
+{% endblock %}
+

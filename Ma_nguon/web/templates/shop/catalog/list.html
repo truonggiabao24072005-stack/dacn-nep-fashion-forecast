@@ -1,0 +1,94 @@
+{% extends 'shop/base.html' %}
+
+{% block content %}
+<div class="container catalogue-intro">
+  <nav class="breadcrumb" aria-label="Đường dẫn"><a href="{% url 'shop_home' %}">Trang chủ</a><span>/</span><span aria-current="page">Sản phẩm</span></nav>
+  <h1>{{ title }}</h1>
+  <nav class="catalogue-tabs" aria-label="Nhóm sản phẩm">
+    <a href="{% url 'shop_catalogue' %}" {% if not selected_category and not collection_only %}aria-current="page"{% endif %}>Tất cả</a>
+    {% for category in shop_categories %}
+      <a href="{% url 'shop_catalogue' %}?category={{ category.code|urlencode }}"
+        {% if selected_category == category.code and not collection_only %}aria-current="page"{% endif %}>{{ category.name }}</a>
+    {% endfor %}
+  </nav>
+</div>
+
+<div class="container catalogue-layout" data-catalogue>
+  <div class="catalogue-tools">
+    <p class="result-count"><strong>{{ page.paginator.count }}</strong> sản phẩm{% if q %} cho “{{ q }}”{% endif %}</p>
+    <button class="catalogue-toggle" type="button" data-filter-toggle aria-controls="catalogue-filters" aria-expanded="true" hidden>
+      {% include 'shop/partials/icon.html' with name='filter' %} Bộ lọc
+    </button>
+  </div>
+
+  <aside id="catalogue-filters" class="filter-sidebar" aria-label="Bộ lọc sản phẩm">
+    <form method="get" id="catalogue-filter">
+      {% if collection_only %}<input type="hidden" name="collection" value="1">{% endif %}
+      <div class="filter-title">Lọc và sắp xếp <a href="{% url 'shop_catalogue' %}{% if collection_only %}?collection=1{% endif %}">Đặt lại</a></div>
+      <label for="search-input">Tìm sản phẩm</label>
+      <div class="search-field"><input id="search-input" type="search" name="q" value="{{ q }}" placeholder="Tên hoặc mã sản phẩm" maxlength="100">{% include 'shop/partials/icon.html' with name='search' %}</div>
+
+      <label for="filter-category">Danh mục</label>
+      <select name="category" id="filter-category">
+        <option value="">Tất cả danh mục</option>
+        {% for c in shop_categories %}<option value="{{ c.code }}" {% if selected_category == c.code %}selected{% endif %}>{{ c.name }}</option>{% endfor %}
+      </select>
+
+      <div class="filter-options">
+        <div>
+          <label for="filter-size">Kích thước</label>
+          <select name="size" id="filter-size">
+            <option value="">Tất cả cỡ</option>
+            {% for s in sizes %}<option value="{{ s.code }}" {% if selected_size == s.code %}selected{% endif %}>{{ s.name }}</option>{% endfor %}
+          </select>
+        </div>
+        <div>
+          <label for="filter-color">Màu sắc</label>
+          <select name="color" id="filter-color">
+            <option value="">Tất cả màu</option>
+            {% for c in colors %}<option value="{{ c.code }}" {% if selected_color == c.code %}selected{% endif %}>{{ c.name }}</option>{% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <label for="sort-order">Sắp xếp</label>
+      <select name="sort" id="sort-order">
+        <option value="curated" {% if sort == 'curated' %}selected{% endif %}>Ưu tiên hàng còn</option>
+        <option value="newest" {% if sort == 'newest' %}selected{% endif %}>Mới nhất</option>
+        <option value="price_asc" {% if sort == 'price_asc' %}selected{% endif %}>Giá tăng dần</option>
+        <option value="price_desc" {% if sort == 'price_desc' %}selected{% endif %}>Giá giảm dần</option>
+      </select>
+
+      <label class="checkbox-label"><input type="checkbox" name="stock" value="1" {% if only_stock %}checked{% endif %}> Chỉ xem hàng còn</label>
+      <button class="button button-dark full-width" type="submit">Áp dụng bộ lọc</button>
+    </form>
+  </aside>
+
+  <section class="catalogue-results" aria-label="Kết quả sản phẩm">
+    {% if q or selected_size or selected_color or only_stock %}
+      <ul class="active-filters" aria-label="Bộ lọc đã áp dụng">
+        {% if q %}<li>“{{ q }}”</li>{% endif %}
+        {% for s in sizes %}{% if selected_size == s.code %}<li>Cỡ {{ s.name }}</li>{% endif %}{% endfor %}
+        {% for c in colors %}{% if selected_color == c.code %}<li>{{ c.name }}</li>{% endif %}{% endfor %}
+        {% if only_stock %}<li>Còn hàng</li>{% endif %}
+      </ul>
+    {% endif %}
+    <div class="product-grid catalogue-grid">
+      {% for item in items %}{% include 'shop/partials/card.html' %}{% empty %}
+        <div class="empty-state">
+          <h2>Không tìm thấy sản phẩm</h2>
+          <p>Thử từ khóa khác hoặc bỏ bớt bộ lọc.</p>
+          <a class="button button-dark" href="{% url 'shop_catalogue' %}">Xem toàn bộ sản phẩm</a>
+        </div>
+      {% endfor %}
+    </div>
+    {% if page.has_other_pages %}
+      <nav class="shop-pagination" aria-label="Phân trang">
+        {% if page.has_previous %}<a href="?{% if query %}{{ query }}&amp;{% endif %}page={{ page.previous_page_number }}">← Trước</a>{% endif %}
+        <span>Trang {{ page.number }} / {{ page.paginator.num_pages }}</span>
+        {% if page.has_next %}<a href="?{% if query %}{{ query }}&amp;{% endif %}page={{ page.next_page_number }}">Tiếp →</a>{% endif %}
+      </nav>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

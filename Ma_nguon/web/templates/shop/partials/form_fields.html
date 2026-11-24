@@ -1,0 +1,11 @@
+{% if form.non_field_errors %}<div class="shop-flash error" role="alert">{{ form.non_field_errors }}</div>{% endif %}
+{% for field in form %}
+<div class="shop-form-field">
+  <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+  {% if field.name == 'password' or field.name == 'password1' or field.name == 'password2' or field.name == 'old_password' or field.name == 'new_password1' or field.name == 'new_password2' %}
+  <div class="password-field">{{ field }}<button type="button" data-password-toggle aria-controls="{{ field.id_for_label }}" aria-label="Hiện {{ field.label|lower }}" aria-pressed="false">Hiện</button></div>
+  {% else %}{{ field }}{% endif %}
+  {% if field.help_text %}<div class="field-help" id="{{ field.auto_id }}_helptext">{{ field.help_text|safe }}</div>{% endif %}
+  {% if field.errors %}<div class="field-error" role="alert">{{ field.errors }}</div>{% endif %}
+</div>
+{% endfor %}

@@ -1,0 +1,27 @@
+{% extends 'store/shared/base.html' %}
+{% block content %}
+<section class="panel padded">
+  <h2>{{ order.supplier.name }}</h2>
+  <p>{{ order.variant }} · Đặt {{ order.ordered_qty }} · Dự kiến {{ order.expected_on|date:'d/m/Y' }}</p>
+  {% if order.cancelled_at %}<p>Đã đóng phần chưa nhận.</p>{% else %}<p>Còn chờ {{ remaining }}.</p>{% endif %}
+  <h3>Phiếu giao đã ghi sổ</h3>
+  <ul>{% for receipt in receipts %}<li><a href="{% url 'document' 'receipt' receipt.pk %}">{{ receipt.code }} · {{ receipt.delivery_reference }}</a></li>
+    {% empty %}<li>Chưa có phiếu nhập liên kết.</li>{% endfor %}</ul>
+</section>
+{% if remaining > 0 and not order.cancelled_at %}
+<div class="two-columns spaced">
+  <section class="panel padded">
+    <h2>Kiểm tra và nhận hàng</h2>
+    <p>Đối chiếu phiếu giao, nhận số lượng đạt. Tách hàng sai hoặc lỗi để xử lý với nhà cung cấp.</p>
+    <form method="post">{% csrf_token %}{% include 'store/shared/form_fields.html' %}<button class="btn primary">Ghi sổ lượng đạt</button></form>
+  </section>
+  <section class="panel padded">
+    <h2>Đóng phần còn chờ</h2>
+    <form method="post" action="{% url 'supplier_order_close' order.pk %}">
+      {% csrf_token %}<button class="btn">Xác nhận không nhận phần còn lại</button>
+    </form>
+  </section>
+</div>
+{% endif %}
+{% endblock %}
+

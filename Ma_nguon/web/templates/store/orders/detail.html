@@ -1,0 +1,24 @@
+{% extends 'store/shared/base.html' %}{% load display %}{% block content %}<div class="panel padded"><h2>{{ order.display_status }}</h2><p>{{ order.customer_name }} · {{ order.phone }}</p>{% if order.delivery_address %}<p>Địa chỉ giao: {{ order.delivery_address }}</p>{% else %}<p>Nhận tại cửa hàng{% if order.pickup_address %} tại {{ order.pickup_address }}{% if order.pickup_address_is_example %} (địa chỉ minh họa){% endif %}{% endif %}.</p>{% endif %}
+{% if order.gateway_payment %}<p>VNPAY: {{ order.gateway_payment.get_status_display }}{% if order.gateway_payment.provider_reference %} · {{ order.gateway_payment.provider_reference }}{% endif %}</p>{% endif %}
+{% if order.tracking_number %}<p>Mã vận đơn: {{ order.tracking_number }}</p>{% endif %}<p>Phương thức khách chọn: <strong>{{ order.get_payment_preference_display }}</strong>. Yêu cầu được ghi nhận chưa phải xác nhận đã thu tiền.</p>{% if order.note %}<p>Lời nhắn: {{ order.note }}</p>{% endif %}{% if order.reason %}<p>Lý do: {{ order.reason }}</p>{% endif %}</div><section class="panel spaced"><div class="table-scroll"><table><thead><tr><th>Sản phẩm</th><th>Biến thể</th><th class="num">SL</th><th class="num">Giá khách xem</th><th class="num">Giá hiện tại</th><th class="num">Tồn hiện tại</th></tr></thead><tbody>{% for line in order.lines.all %}<tr><td>{{ line.name_snapshot }}<small class="muted">{{ line.sku_snapshot }}</small></td><td>{{ line.variant_snapshot }}</td><td class="num">{{ line.quantity }}</td><td class="num">{{ line.unit_price|vnd }} đ</td><td class="num">{{ line.variant.selling_price|vnd }} đ</td><td class="num">{{ line.variant.balance.quantity }}</td></tr>{% endfor %}</tbody></table></div><div class="padded">Tổng khách đã xem: <strong>{{ order.total_amount|vnd }} đ</strong></div></section>{% if order.status == 'PENDING' %}<div class="two-columns spaced"><section class="panel padded"><h3>Tiếp nhận yêu cầu</h3><p>Kiểm tra hàng và thông tin với khách. Tiếp nhận tạo một đơn bán nháp. Tồn kho và khoản thu chỉ thay đổi khi đơn bán được ghi sổ.</p><form method="post">{% csrf_token %}<input type="hidden" name="version" value="{{ order.version }}"><input type="hidden" name="action" value="accept"><label class="checkbox-row"><input type="checkbox" name="price_ack"> Đã thống nhất giá mới với khách nếu giá hiện tại khác giá lúc gửi</label><button class="btn primary spaced">Tiếp nhận và tạo đơn bán nháp</button></form></section><section class="panel padded"><h3>Không thể tiếp nhận</h3><form method="post">{% csrf_token %}<input type="hidden" name="version" value="{{ order.version }}"><input type="hidden" name="action" value="cancel"><label for="cancel-reason">Lý do hiển thị cho khách</label><textarea id="cancel-reason" name="reason" maxlength="1000" required rows="3"></textarea><button class="btn spaced">Hủy yêu cầu có lý do</button></form></section></div>{% elif order.sale_id %}
+{% if order.pickup_expires_at and order.lifecycle_status == 'ACCEPTED' %}
+  <p>Giữ hàng đến {{ order.pickup_expires_at|date:'H:i d/m/Y' }}.</p>
+  {% if pickup_overdue %}
+    <form method="post">{% csrf_token %}<button class="btn" name="action" value="no_show">Đóng đơn khách không đến nhận</button></form>
+  {% endif %}
+{% endif %}
+{% if order.delivery_address and order.lifecycle_status == 'COMPLETED' %}
+  {% if not order.shipment_status %}
+    <form method="post" class="panel padded spaced">
+      {% csrf_token %}<input type="hidden" name="action" value="ship">
+      <label for="tracking">Mã vận đơn</label>
+      <input id="tracking" name="tracking" maxlength="100" required>
+      <button class="btn primary">Bàn giao vận chuyển</button>
+    </form>
+  {% elif order.shipment_status == 'SHIPPED' %}
+    <form method="post" class="panel padded spaced">
+      {% csrf_token %}<input type="hidden" name="action" value="deliver">
+      <button class="btn primary">Xác nhận đã giao</button>
+    </form>
+  {% endif %}
+{% endif %}<p class="spaced">Nhân viên tiếp nhận: {{ order.handled_by }} · {{ order.handled_at|date:'d/m/Y H:i' }}</p>{% if is_admin or order.handled_by_id == user.pk %}<a class="btn primary" href="{% url 'document' 'sale' order.sale_id %}">Mở đơn bán {{ order.sale.code }} ↗</a>{% endif %}{% endif %}{% endblock %}

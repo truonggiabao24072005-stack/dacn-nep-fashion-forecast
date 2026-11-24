@@ -1,0 +1,21 @@
+{% load static display %}
+<article class="product-card">
+  <a class="product-picture" href="{% url 'shop_product' item.product.pk %}" aria-label="Xem {{ item.product.name }}">
+    {% if item.image %}
+      <img src="{% static item.image %}" alt="Ảnh tham khảo {{ item.product.name }}" loading="lazy" decoding="async"
+        width="{{ item.photo.width }}" height="{{ item.photo.height }}">
+    {% else %}
+      <div class="no-photo">{{ item.product.name }}<small>Chưa có ảnh sản phẩm</small></div>
+    {% endif %}
+    {% if not item.has_stock %}<span class="product-tag">Tạm hết hàng</span>{% endif %}
+    <span class="card-quick-view" aria-hidden="true">Xem chi tiết</span>
+  </a>
+  <div class="card-body">
+    <div class="card-meta">
+      <span class="category-label">{{ item.product.category.name }}</span>
+      <div class="card-swatches" aria-label="Màu sắc">{% for color in item.colors %}<span style="--swatch:{{ color.hex }}" role="img" aria-label="{{ color.name }}" title="{{ color.name }}"></span>{% endfor %}</div>
+    </div>
+    <h3><a href="{% url 'shop_product' item.product.pk %}">{{ item.product.name }}</a></h3>
+    <div class="card-price">{% if item.price != None %}{% if item.price_varies %}<span class="price-prefix">Từ </span>{% endif %}{{ item.price|vnd }}<span>đ</span>{% else %}<span class="price-unavailable">Chưa mở bán</span>{% endif %}</div>
+  </div>
+</article>

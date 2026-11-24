@@ -1,0 +1,56 @@
+{% extends 'store/shared/base.html' %}{% load display %}
+{% block content %}
+<p class="forecast-subtitle"><a href="{% url 'forecasts' %}?dataset={{ value.forecast_unit.dataset_version_id }}">← Danh sách dự báo</a> · <a href="{% url 'guide' %}#goi-y-nhap">Hướng dẫn nhập hàng</a></p>
+<details><summary>Định danh nguồn dữ liệu</summary><p class="mono muted long-id">{{ value.forecast_unit.external_key }}</p></details>
+{% if value.forecast_unit.internal_product_id %}<section class="panel padded spaced"><h3>Sản phẩm đã đối chiếu</h3><p>{{ value.forecast_unit.internal_product.code }} · {{ value.forecast_unit.internal_product.name }}</p><p class="muted">Mã hàng đã liên kết với danh mục. Nguồn lịch sử, đơn vị và kỳ áp dụng vẫn cần đáp ứng các điều kiện bên dưới trước khi tính lượng nhập.</p><details><summary>Hồ sơ đối chiếu</summary><p class="muted small" style="overflow-wrap:anywhere">{{ value.forecast_unit.mapping_evidence }}</p></details><p><a href="{% url 'shop_product' value.forecast_unit.internal_product_id %}">Xem trang sản phẩm ↗</a></p></section>{% endif %}
+<div class="source-summary">
+  <div><small>Tháng dự báo</small><strong>{{ value.run.target_month|date:'m/Y' }}</strong></div>
+  <div><small>Lượng dự báo</small><strong>{{ value.nonnegative_value|number }} {{ value.forecast_unit.unit }}</strong></div>
+  <div><small>Phương pháp</small><strong>{{ value.run.model_result.method|method_name }}</strong></div>
+  <div><small>Nguồn</small><strong>{{ value.forecast_unit.dataset_version.get_source_type_display }}</strong></div>
+</div>
+<p class="muted">Dự báo lượng bán ghi nhận theo tháng. Chưa đo được phần nhu cầu bị mất khi hết hàng; cần đối chiếu trước khi quyết định nhập.</p>
+{% if value.result_status != 'VALID' %}<div class="message warning">Chưa đủ dữ liệu để công bố dự báo cho sản phẩm này. Giá trị chưa có không có nghĩa là dự báo bằng 0.</div>{% endif %}
+<div class="forecast-layout">
+  <section class="panel padded">
+    <h3>Lượng bán quan sát theo tháng</h3>
+    {{ chart|json_script:'history-data' }}
+    <canvas data-chart="history-data" aria-label="Biểu đồ lượng bán tháng; khoảng trống là tháng chưa biết, xem bảng dữ liệu phía dưới." role="img"></canvas>
+    <details class="history-table"><summary>Xem bảng lượng bán theo tháng</summary><div class="table-scroll"><table>
+      <thead><tr><th>Tháng</th><th class="num">Lượng dương</th><th class="num">Trị tuyệt đối âm</th><th>Quan sát</th></tr></thead>
+      <tbody>{% for r in history %}<tr>
+        <td>{{ r.month|date:'m/Y' }}</td><td class="num">{{ r.target_qty|number }}</td><td class="num">{{ r.negative_qty_abs|number }}</td>
+        <td>{% if r.observation_status == 'OBSERVED' %}Đã quan sát{% elif r.observation_status == 'VERIFIED_ZERO' %}Đã xác nhận không bán{% else %}Chưa biết{% endif %}</td>
+      </tr>{% empty %}<tr><td colspan="4" class="empty">Chưa có lịch sử đủ điều kiện.</td></tr>{% endfor %}</tbody>
+    </table></div></details>
+    <p class="muted small">Tháng chưa biết được giữ thành khoảng trống. Lượng âm được lưu riêng, không tự coi là hàng trả hoặc xóa khỏi lịch sử.</p>
+  </section>
+  <section class="panel padded">
+    <div class="decision-head"><span class="section-icon">{% include 'store/shared/icon.html' with name='forecast' %}</span><div><h2>Đề xuất nhập hàng</h2><p>Đối chiếu điều kiện và tồn trước khi lưu.</p></div></div>
+    {% if reasons %}<div class="message warning"><strong>Chưa tính lượng nhập</strong><ul>{% for reason in reasons %}<li>{{ reason }}</li>{% endfor %}</ul></div>{% endif %}
+    {% if preview %}
+    <h4>Số liệu để đối chiếu trước khi lưu</h4>
+    <div class="table-scroll"><table><tbody>
+      <tr><th>Dự báo cả tháng</th><td class="num">{{ preview.forecast|number }} {{ product.unit }}</td></tr>
+      <tr><th>Đã bán trong tháng</th><td class="num">{{ preview.sold|number }} {{ product.unit }}</td></tr>
+      <tr><th>Dự kiến còn lại</th><td class="num">{{ preview.remaining|number }} {{ product.unit }}</td></tr>
+      <tr><th>Tồn bán được</th><td class="num">{{ preview.stock|number }} {{ product.unit }}</td></tr>
+      <tr><th>Tồn an toàn</th><td class="num">{{ preview.safety|number }} {{ product.unit }}</td></tr>
+      <tr><th>Lượng nhập tham khảo</th><td class="num"><strong>{{ preview.quantity|number }} {{ product.unit }}</strong></td></tr>
+    </tbody></table></div>
+    {% if not preview.within_limit %}<p class="message warning">Số lượng vượt giới hạn lưu trữ. Cần đối chiếu dữ liệu trước khi lưu.</p>{% elif preview.quantity == 0 %}<p>Tồn bán được hiện đủ bù phần dự kiến còn lại và tồn an toàn theo công thức. Lượng nhập tham khảo là 0.</p>{% endif %}
+    <p class="muted small">Đây là số liệu xem trước. Khi lưu, hệ thống kiểm tra lại và tính theo tồn tại thời điểm xử lý.</p>
+    {% endif %}
+    <details class="formula-details"><summary>Cách tính lượng nhập</summary><p class="formula">Phần dự kiến còn lại = max(0, dự báo cả tháng − lượng đã bán trong tháng)</p>
+    <p class="formula">Lượng nhập = max(0, làm tròn lên(phần dự kiến còn lại + tồn an toàn − tồn bán được))</p></details>
+    {% if reasons %}
+    {% elif preview and not preview.within_limit %}<p>Cần kiểm tra lại số liệu trước khi lưu đề xuất.</p>
+    {% elif is_admin %}<form method="post" action="{% url 'suggest' value.pk %}">{% csrf_token %}<button class="btn primary">Tính lại và lưu đề xuất</button></form>
+    {% else %}<p>Quản trị viên tính đề xuất từ chính sách và tồn hiện tại.</p>{% endif %}
+    {% if product and is_admin %}<p><a href="{% url 'safety' product.pk %}">Cấu hình tồn an toàn của sản phẩm ↗</a></p>{% endif %}
+    {% for row in suggestions %}<article class="suggestion"><strong>{{ row.object.suggested_qty }} {{ row.object.product.unit }}</strong><span class="badge {% if row.stale %}warn{% else %}posted{% endif %}">{% if row.stale %}Cần tính lại{% else %}Theo số liệu đã lưu{% endif %}</span><p>Dự báo tháng {{ row.object.inventory_versions.forecast|number }} · đã bán {{ row.object.inventory_versions.period_sales_qty|number }} · dự kiến còn lại {{ row.object.inventory_versions.remaining_forecast|number }}</p><p>Phần còn lại {{ row.object.inventory_versions.remaining_forecast|number }} + tồn an toàn {{ row.object.safety_stock_snapshot }} − tồn bán được {{ row.object.inventory_qty_snapshot }}</p><small>{{ row.object.inventory_as_of|date:'d/m/Y H:i:s' }}</small></article>{% endfor %}
+    {% if variants %}<h3 class="spaced">Tồn từng cỡ và màu</h3><div class="table-scroll"><table><thead><tr><th>Biến thể</th><th class="num">Tồn</th><th>Được tính vào tồn bán được</th></tr></thead><tbody>{% for v in variants %}<tr><td>{{ v.size.name }} / {{ v.color.name }}</td><td class="num">{{ v.balance.quantity }}</td><td>{% if v.pk in sellable_variant_ids %}Có{% else %}Không{% endif %}</td></tr>{% endfor %}</tbody></table></div>{% endif %}
+    <p class="muted small spaced">Chỉ trừ tồn của biến thể đang mở bán, có thuộc tính và giá hợp lệ. Đề xuất không tự chia theo cỡ/màu, không giữ hàng và không tạo phiếu nhập.</p>
+  </section>
+</div>
+{% endblock %}

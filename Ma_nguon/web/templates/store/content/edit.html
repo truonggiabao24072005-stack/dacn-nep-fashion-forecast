@@ -1,0 +1,14 @@
+{% extends 'store/shared/base.html' %}
+{% block content %}
+<section class="panel form-panel">
+  <form method="post">
+    {% csrf_token %}
+    {% include 'store/shared/form_fields.html' %}
+    <div class="form-actions">
+      <button class="btn primary">Lưu bài viết</button>
+      <a class="btn" href="{% url 'shop_manage_posts' %}">Quay lại</a>
+    </div>
+  </form>
+</section>
+{% endblock %}
+
