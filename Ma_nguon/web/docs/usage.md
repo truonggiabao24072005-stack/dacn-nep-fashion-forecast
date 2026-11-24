@@ -18,4 +18,4 @@ Gợi ý nhập theo biến thể đọc lịch sử và tồn bán được, t�
 
 ## Kiểm tra
 
-Chạy `test.ps1` trên CSDL kiểm thử riêng. Nhật ký lần chạy được ghi trong `.runtime/evidence/`. Dùng `database.ps1` hoặc các truy vấn trong sql để đối chiếu tiền, chứng từ và sổ kho.
+Chạy `test.ps1` trên CSDL kiểm thử riêng. Nhật ký lần chạy được ghi trong `.runtime/evidence/`. Dùng `database.ps1` hoặc phần truy vấn đối soát ở cuối tệp `CSDL_dacn_truong_gia_bao_1250080020.sql` trong pgAdmin để đối chiếu tiền, chứng từ và sổ kho.

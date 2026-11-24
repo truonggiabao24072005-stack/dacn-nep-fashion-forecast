@@ -4,7 +4,7 @@
 
 ## Thành phần
 
-- `Ma_nguon/web`: website, nghiệp vụ, migrations, SQL, ảnh sản phẩm và kiểm thử.
+- `Ma_nguon/web`: website, nghiệp vụ, migrations, ảnh sản phẩm và kiểm thử.
 - `Ma_nguon/nghien_cuu`: kiểm tra dữ liệu và chạy lại thực nghiệm dự báo.
 - `Du_lieu/README.md`: nguồn dữ liệu và cách bố trí bộ dữ liệu được nộp cùng đồ án.
 
@@ -23,13 +23,12 @@ Copy-Item .env.example .env
 ```
 
 3. Điền chuỗi vừa tạo vào `DJANGO_SECRET_KEY` của `.env`. Điền `DB_NAME=dacn_truong_gia_bao`, `DB_USER` (tài khoản PostgreSQL đã dùng chạy SQL, ví dụ `postgres`), `DB_PASSWORD`, `DB_HOST=127.0.0.1`, `DB_PORT` (thường là `5432`) theo PostgreSQL trên máy nhận. Để chạy cục bộ, đặt `DJANGO_DEBUG=true`, giữ host `127.0.0.1,localhost`. Không đăng `.env` lên GitHub.
-4. Nạp CSDL bằng SQL trực tiếp trong pgAdmin (PostgreSQL 18):
+4. Nạp CSDL bằng một tệp query SQL thuần duy nhất trong pgAdmin 4 (PostgreSQL 18), không chạy tệp SQL trong mã nguồn và không dùng Restore/`pg_restore`:
 
-   - Mở Query Tool tại database `postgres`, bật Auto commit và chạy riêng `CSDL/00_tao_database.sql`.
-   - Refresh Databases, chọn `dacn_truong_gia_bao` vừa tạo, mở Query Tool mới, bật Auto commit và chạy toàn bộ `CSDL/01_khoi_tao_he_thong.sql`.
-   - Chạy `CSDL/02_kiem_tra_sau_khi_chay.sql` để đối chiếu.
+   - Tạo database rỗng tên `dacn_truong_gia_bao` (chuột phải `Databases > Create > Database...`, giữ Encoding `UTF8`, bấm Save; hoặc chạy lệnh `CREATE DATABASE dacn_truong_gia_bao WITH TEMPLATE = template0 ENCODING = 'UTF8';` tại database `postgres`).
+   - Refresh mục `Databases`, chọn đúng `dacn_truong_gia_bao`, mở `Tools > Query Tool`, bật **Auto commit**, mở tệp `CSDL_dacn_truong_gia_bao_1250080020.sql` và nhấn **F5** để chạy toàn bộ (tạo cấu trúc, nạp dữ liệu và tự chạy bảng đối soát 11 chỉ tiêu với `so_loi = 0`).
 
-   Hướng dẫn từng bước và cách xử lý lỗi ở `CSDL/HUONG_DAN_CHAY_POSTGRESQL.txt`. Bộ SQL đã có cấu trúc và dữ liệu; không cần dùng Restore hoặc `pg_restore`.
+   Xem hướng dẫn từng bước và cách xử lý lỗi tại `CSDL/HUONG_DAN_CHAY_POSTGRESQL.txt`.
 
 5. Đặt thư mục `Du_lieu` từ bộ hồ sơ nộp cạnh `Ma_nguon`. Có thể dùng biến `DACN_DATA_DIR` trong `.env` để chọn vị trí khác. Chạy:
 
@@ -43,7 +42,7 @@ Copy-Item .env.example .env
 
 Trang mua hàng: http://127.0.0.1:8891/. Trang quản lý: http://127.0.0.1:8891/quan-tri/. Đăng nhập quản lý bằng tài khoản vừa tạo. Bộ tệp SQL CSDL không chứa mật khẩu rõ; không dùng tài khoản cũ làm tài khoản mặc định trên máy khác.
 
-Nếu cài từ CSDL rỗng, xem `manage.py help khoi_tao_cua_hang` để khởi tạo danh mục; dữ liệu nghiên cứu và lịch sử giao dịch cần nạp riêng. Bộ SQL trong `CSDL` là cách tái hiện đầy đủ cấu trúc và dữ liệu của hồ sơ đã nộp.
+Nếu cài từ CSDL rỗng, xem `manage.py help khoi_tao_cua_hang` để khởi tạo danh mục; dữ liệu nghiên cứu và lịch sử giao dịch cần nạp riêng. Tệp query SQL `CSDL_dacn_truong_gia_bao_1250080020.sql` chạy trên pgAdmin là cách tái hiện đầy đủ cấu trúc và dữ liệu của hồ sơ đã nộp.
 
 ## Kiểm tra và nghiên cứu
 
@@ -53,7 +52,7 @@ Nếu cài từ CSDL rỗng, xem `manage.py help khoi_tao_cua_hang` để khởi
 .venv/Scripts/python.exe tools/train_forecast.py --verify-reference
 ```
 
-Kiểm thử dùng CSDL riêng; tài khoản PostgreSQL cần quyền tạo CSDL kiểm thử. Hướng dẫn nghiệp vụ ở `Ma_nguon/web/docs/usage.md`, thanh toán ở `docs/payments.md`, quản lý CSDL ở `sql/README.md`.
+Kiểm thử dùng CSDL riêng; tài khoản PostgreSQL cần quyền tạo CSDL kiểm thử. Hướng dẫn nghiệp vụ ở `Ma_nguon/web/docs/usage.md`, thanh toán ở `Ma_nguon/web/docs/payments.md`, nạp CSDL ở `CSDL/HUONG_DAN_CHAY_POSTGRESQL.txt`.
 
 ## Phạm vi kết quả
 

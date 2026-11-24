@@ -52,7 +52,7 @@ def start_server(base=None):
     runtime.mkdir(parents=True, exist_ok=True)
     if not database_ready(base):
         raise SystemExit(
-            "Cannot connect to PostgreSQL. Check the PostgreSQL service and DB_* settings in .env (see CSDL/HUONG_DAN_CHAY_POSTGRESQL.txt)."
+            "Cannot connect to PostgreSQL. Create dacn_truong_gia_bao, run CSDL_dacn_truong_gia_bao_1250080020.sql in pgAdmin Query Tool, and check DB_* in .env."
         )
     if web_ready():
         print("Web is already running at " + ADDRESS)

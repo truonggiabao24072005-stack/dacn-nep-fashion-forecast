@@ -15,6 +15,7 @@ import django
 django.setup()
 from audit_project import snapshot
 from django.db import connection, transaction
+from manage_database import RECONCILIATION_SQL
 
 
 def inspect_database():
@@ -63,7 +64,7 @@ def inspect_database():
             dict(zip([column.name for column in cursor.description], row))
             for row in cursor.fetchall()
         ]
-        cursor.execute((BASE / "sql/02_kiem_tra_toan_ven.sql").read_text(encoding="utf-8"))
+        cursor.execute(RECONCILIATION_SQL)
         reconciliation = {name: count for name, count in cursor.fetchall()}
     return {
         "database": database,
@@ -152,7 +153,7 @@ def main():
                         + "`"
                     )
             lines.append("")
-        (BASE / "sql/TU_DIEN_DU_LIEU.md").write_text("\n".join(lines), encoding="utf-8")
+        (output / "TU_DIEN_DU_LIEU.md").write_text("\n".join(lines), encoding="utf-8")
     print(
         json.dumps(
             {

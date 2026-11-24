@@ -4,12 +4,11 @@ Website mua hàng và quản lý cửa hàng giày dép, xây dựng bằng Djan
 
 ## Chạy ứng dụng
 
-Tạo môi trường Python, cài `requirements.txt`, tạo `.env` theo `.env.example` và nạp bộ SQL trong thư mục `CSDL` của hồ sơ nộp bằng pgAdmin (PostgreSQL 18):
+Tạo môi trường Python, cài `requirements.txt`, tạo `.env` theo `.env.example` và nạp CSDL bằng tệp query SQL duy nhất (`CSDL_dacn_truong_gia_bao_1250080020.sql`) trên pgAdmin 4 (PostgreSQL 18), không chạy tệp SQL từ trong mã nguồn và không dùng Restore/`pg_restore`:
 
-1. Mở Query Tool tại database `postgres`, bật Auto commit và chạy riêng `CSDL/00_tao_database.sql` để tạo database `dacn_truong_gia_bao`.
-2. Refresh mục Databases, chọn đúng `dacn_truong_gia_bao`, mở Query Tool mới, bật Auto commit và chạy toàn bộ `CSDL/01_khoi_tao_he_thong.sql`.
-3. Chạy `CSDL/02_kiem_tra_sau_khi_chay.sql` để đối chiếu. Không cần dùng Restore hoặc `pg_restore`.
-4. Trong `.env`, điền `DB_NAME=dacn_truong_gia_bao` cùng `DB_USER` (tài khoản PostgreSQL đã dùng chạy SQL, ví dụ `postgres`), `DB_PASSWORD`, `DB_HOST=127.0.0.1`, `DB_PORT` (thường là `5432`) và `DJANGO_SECRET_KEY`. Xem chi tiết từng bước tại `CSDL/HUONG_DAN_CHAY_POSTGRESQL.txt`.
+1. Trong pgAdmin, tạo database rỗng tên `dacn_truong_gia_bao` (chuột phải `Databases > Create > Database...`, giữ Encoding `UTF8`, bấm Save; hoặc chạy lệnh `CREATE DATABASE dacn_truong_gia_bao WITH TEMPLATE = template0 ENCODING = 'UTF8';` tại database `postgres`).
+2. Refresh mục `Databases`, chọn đúng `dacn_truong_gia_bao`, mở `Tools > Query Tool`, bật **Auto commit**, mở tệp duy nhất `CSDL_dacn_truong_gia_bao_1250080020.sql` và nhấn **F5** để chạy toàn bộ (tạo cấu trúc, nạp đầy đủ dữ liệu và chạy bảng đối soát 11 chỉ tiêu với `so_loi = 0`).
+3. Trong `.env`, điền `DB_NAME=dacn_truong_gia_bao`, `DB_USER` (tài khoản PostgreSQL đã dùng chạy SQL, ví dụ `postgres`), `DB_PASSWORD`, `DB_HOST=127.0.0.1`, `DB_PORT` (thường là `5432`) và `DJANGO_SECRET_KEY`. Xem chi tiết tại `CSDL/HUONG_DAN_CHAY_POSTGRESQL.txt`.
 
 Sau đó chạy:
 
@@ -22,7 +21,7 @@ python manage.py runserver 127.0.0.1:8891
 ```
 
 Trang mua hàng: http://127.0.0.1:8891/. Trang quản lý: http://127.0.0.1:8891/quan-tri/ (đăng nhập bằng tài khoản quản trị vừa tạo bằng `createsuperuser`).
-Trên máy đã có môi trường và CSDL cục bộ, có thể dùng `run.ps1`. Dùng `test.ps1` để kiểm thử và `database.ps1` để đối soát, sao lưu hoặc phục hồi thử.
+Trên máy đã có môi trường và CSDL cục bộ, có thể dùng `run.ps1`. Dùng `test.ps1` để kiểm thử và `database.ps1` để đối soát dữ liệu khi ứng dụng đang chạy.
 
 ## Tổ chức mã
 
@@ -35,7 +34,7 @@ Tệp nguồn, dữ liệu huấn luyện và kết quả mô hình được gi�
 Có thể đổi vị trí bằng các biến trong `.env`: `DACN_DATA_DIR`, `RESEARCH_RESULTS_DIR`, `RESEARCH_ARTIFACTS_DIR`. Các lệnh nghiên cứu đọc nguồn từ `DACN_SOURCE_DIR` nếu được thiết lập.
 Nhật ký kiểm tra, bản sao cục bộ và tệp sinh khi chạy nằm trong `.runtime/`; không đưa thư mục này hoặc `.env` lên kho mã.
 
-Xem `docs/structure.md`, `docs/usage.md`, `docs/payments.md` và `sql/README.md` để tra cứu chi tiết.
+Xem `docs/structure.md`, `docs/usage.md` và `docs/payments.md` để tra cứu chi tiết.
 
 ## Chạy phần huấn luyện riêng
 
