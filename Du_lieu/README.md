@@ -1,6 +1,6 @@
 # Dữ liệu của đồ án
 
-Nguồn nghiên cứu: Sales and Inventory Snapshot Data, tác giả tài khoản `tienanh2003` trên Kaggle: https://www.kaggle.com/datasets/tienanh2003/sales-and-inventory-snapshot-data.
+Nguồn nghiên cứu: sales_and_inventory_snapshot_data, tác giả tài khoản `tienanh2003` trên Kaggle: https://www.kaggle.com/datasets/tienanh2003/sales-and-inventory-snapshot-data.
 
 Bộ hồ sơ nộp có đầy đủ các thư mục sau. Chép chúng vào `Du_lieu` cạnh `Ma_nguon` sau khi tải mã từ GitHub:
 

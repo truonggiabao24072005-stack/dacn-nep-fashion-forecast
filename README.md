@@ -48,7 +48,7 @@ Nếu cài từ CSDL rỗng, xem `manage.py help khoi_tao_cua_hang` để khởi
 ```powershell
 .venv/Scripts/python.exe manage.py test store.tests
 .venv/Scripts/python.exe -m pip install -r ../nghien_cuu/requirements.txt
-.venv/Scripts/python.exe ../nghien_cuu/train.py --help
+.venv/Scripts/python.exe ../nghien_cuu/train.py
 ```
 
 Kiểm thử dùng CSDL riêng; tài khoản PostgreSQL cần quyền tạo CSDL kiểm thử. Hướng dẫn nghiệp vụ ở `Ma_nguon/web/docs/usage.md`, thanh toán ở `docs/payments.md`, quản lý CSDL ở `sql/README.md`.
